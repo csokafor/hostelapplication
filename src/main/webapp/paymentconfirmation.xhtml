@@ -1,0 +1,41 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="templates/template.xhtml">
+
+    <ui:define name="content">
+        
+    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+    <h:form id="hostelPaymentForm">
+        <p:panel>
+            <f:facet name="header">Payment Information</f:facet>
+            <p:panelGrid columns="2" columnClasses="label, value">
+            
+            <h:outputText value="Application Number" />
+            <h:outputText id="requestNumber" value="#{hostelPaymentBean.hostelApplication.applicationNumber}"/>
+            
+            <h:outputText value="Student Number" />
+            <h:outputText id="studentNumber" value="#{hostelPaymentBean.hostelApplication.studentNumber}"/>
+
+            <h:outputText value="Name" />
+            <h:outputText id="firstName" value="#{hostelPaymentBean.hostelApplication.lastName}, #{hostelPaymentBean.hostelApplication.firstName} #{hostelPaymentBean.hostelApplication.otherNames}"/>               
+                                         
+            <h:outputText value="Total Amount" />                               
+            <h:outputText id="TotalAmount" value="#{hostelPaymentBean.hostelApplication.totalAmount}">        
+                   <f:convertNumber type="currency" currencySymbol="=N="/>
+            </h:outputText>         	                
+            </p:panelGrid>   
+            <br/>
+             <h:commandButton id="continue" value="Continue"
+                         action="#{paymentBean.processPayment(hostelPaymentBean.hostelApplication.applicationNumber,hostelPaymentBean.hostelApplication.totalAmount,'Accommodation Fee')}" />
+             &nbsp;&nbsp;&nbsp;&nbsp;
+            <h:commandButton id="cancel" value="Cancel"  action="#{hostelPaymentBean.cancel}" />
+        </p:panel>    
+    </h:form>		
+</ui:define>
+
+</ui:composition>

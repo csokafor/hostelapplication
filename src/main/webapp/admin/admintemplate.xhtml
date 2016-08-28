@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:f="http://java.sun.com/jsf/core"
+      >
+
+	<h:head>		
+		<h:outputStylesheet name="orange.css" library="css" />
+		<h:outputStylesheet name="style.css" library="css" />                
+		<h:outputStylesheet name="js-image-slider.css" library="css" />
+		<h:outputScript name="js-image-slider.js" library="css" />                
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+                <title>UNICAL Student Affairs</title>
+	</h:head>
+    
+    <h:body>
+        <h:outputStylesheet name="primeface_ext.css" library="css" />
+	<div id="main">
+            <div id="links">
+                <h:outputText value="Welcome #{loginUserBean.user.lastName}"/> |  <h:form><h:commandLink value="Sign out" action="#{loginController.logout}" /></h:form>
+            </div>
+                
+            <div id="logo"><h1>University of Calabar Student Affairs Division</h1><h2></h2></div>
+            
+            <div id="menu">
+                <h:form>
+                <p:menubar>
+                    <p:submenu label="Home">
+                        <p:menuitem value="Home" url="index.xhtml" />
+                    </p:submenu>
+                    <p:submenu label="Hostel Ballot">
+                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Eligible Ballot Admin" url="/admin/eligibleballotstudentupload.xhtml" />
+                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Ballot Admin" url="/admin/hostelballotapplicationlist.xhtml" />
+                    </p:submenu>
+                    <p:submenu label="Hostel Application">
+                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Application Admin" url="/admin/hostelapplicationlist.xhtml" />
+                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Student Admin" url="/admin/eligiblestudentlist.xhtml" />
+                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Eligible Student Admin" url="/admin/eligiblestudentupload.xhtml" />
+                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Hostel Admin" url="/admin/hosteladminlist.xhtml" />
+                    </p:submenu>
+                    <p:submenu label="Pin Admin">
+                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Check Pin Status" url="/admin/checkpinstatus.xhtml" />
+                        <p:menuitem rendered="#{loginUserBean.hasRole('Pin Admin')}" value="Pin Upload" url="/admin/pinupload.xhtml" />
+                    </p:submenu>
+                </p:menubar>
+                </h:form>
+            </div>	
+            <br/>
+    	<div id="content">    	
+            <ui:insert name="content" />	    
+    	</div>
+    	<div id="footer">Copyright &copy; 2015 University of Calabar Student Affairs Division &nbsp;|&nbsp; Powered by Anamme &nbsp;|&nbsp; </div>
+    </div>
+    
+    </h:body>
+
+</html>

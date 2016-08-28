@@ -1,0 +1,116 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="templates/template.xhtml">
+    
+<script language="javascript">
+               
+    function confirmCheckBox() {
+        alert("confirmCheckBox");
+        if(document.getElementById('hostelApplicationStatusForm:rulescheckbox').checked) {
+            return true;
+        } else {
+            alert("You must agree to hostel regulations!!");
+            return false;
+        }
+        
+    }
+    
+</script>	
+
+<ui:define name="content">
+
+    <p:panel>        	
+         <f:facet name="header">Check Hostel Application</f:facet>	
+         <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+         <p align="center"><strong>STUDENTS' AFFAIRS DIVISION</strong></p>
+         <p align="center"><strong>UNIVERSITY OF CALABAR</strong></p>
+         <p align="center"><strong>HALL REGULATIONS</strong></p>
+         <br/>           
+
+         <p>Students who wish to reside in the University Hostels MUST abide by the following rules and regulations:</p>
+         <ol>
+            <li>Occupation of bed spaces and wardrobes is based on seniority. The most senior students in each room occupy the down bed spaces.</li>              
+            <li>Students' allocated spaces in hostels are to move into such rooms within two weeks of allocation, otherwise the accommodation will be forfeited to other students.</li>
+            <li>No Student shall under any circumstance, sublet or rent a room, bed or wardrobe to any other Student.</li>
+            <li>Partitioning of rooms with any material or for any reason in all halls of residence is prohibited to avoid poor ventilation.</li>
+            <li>Quarreling and fighting are strictly prohibited.</li>
+            <li>Stealing in the hostel is a very serious offence and regarded as gross misconduct.</li>
+            <li>Participation of Students in secret cult activities is a serious offence and warrants expulsion from the University.</li>
+            <li>Illegal connection of electricity in the hostels is prohibited.</li>
+            <li>Authorization to move from one room to another in the same hostel or from one hostel to another shall only be obtained from the Dean, Deputy Registrar or the Chairman of the appropriate hostel allocation committee.</li>
+            <li>Cooking inside the rooms is prohibited.</li>
+            <li>In the female hostels, expectant mothers will NOT be allowed to continue to reside in the hostel beyond the 28th week of pregnancy.</li>
+            <li>Students who keep large sums of money or other valuables in their rooms do so at their own risk. They are advised to deposit their money in the bank.</li>
+            <li>Personal property MUST not be left in the room during second semester vacations. All Students in the halls and their personal belongings MUST be evacuated completely at the end of every session.</li>
+         </ol>
+
+         <br/>
+         <p><strong>THE FOLLOWING TYPES OF BEHAVIOUR ARE ALSO PROHIBITED AND CONSTITUTE MISCONDUCT IN HALLS OF RESIDENCE</strong></p>
+         <ol type="a">             
+            <li>MISUSE AND DESTRUCTION OF TOILET AND OTHER UNIVERSITY PROPERTY.</li>
+            <li>MOLESTATION OF STAFF BY STUDENTS</li>
+            <li>GAMBLING</li>
+            <li>AIDING AND ABETTING CRIMES</li>
+            <li>POSSESSION OF GUNS and OTHER DANGEROUS WEAPONS LIKE KNIVES, AXES ETC BY STUDENTS</li>
+            <li>INSUBORDINATION TO CONSTITUTED AUTHORITY.</li>
+            <li>SELLING OF UNIVERSITY PROPERTY E.G MATTRESSES, FANS.</li>
+            <li>VIOLATION OF VISITING HOURS BY STUDENTS</li>
+            <li>KEEPING OF PETS ( DOGS,CATS ETC)</li>
+            <li>DISTURBING OTHER STUDENTS AS A RESULT OF NOISE FROM CELEBRATIONS, LOUD MUSIC ETC.</li>
+            <li>SMOKING IN THE ROOM.</li>
+            <li>DEFECATING OR URINATING IN PLACES OTHER THAN TOILET.</li>
+            <li>BATHING IN THE QUADRANGLE</li>
+            <li>BRUSHING OF MOUTH OR WASHING CLOTHES/ OTHER ITEMS AND THROWING WATER FROM THE TOP FLOORS.</li>
+            <li>PREACHING WITH LOUD SPEAKERS OR MICROPHONES BETWEEN 12 MIDNIGHT AND 7.00AM</li>
+            <li>SQUATTING OF ANOTHER STUDENT OR A NON- STUDENT.</li>
+         </ol>
+         <p>The violation of any of the above rules and regulations will amount to misconduct by the Students. The defaulting Students shall be ejected from the hostel and shall be disciplined as appropriate by the Students disciplinary committee of the University.</p>
+         <br/>
+         
+         <p><strong>FOR THE AVOIDANCE OF DOUBT, THE FOLLOWING ARE ACCEPTABLE IN THE HOSTEL (ANY ITEM OUTSIDE THESE ARE NOT ACCEPTABLE)</strong></p>
+         <ol type="a">             
+             <li>Pressing iron</li>
+             <li>Fridge</li>
+             <li>Water heater (coil)</li>
+             <li>Fan</li>
+             <li>Radio Cassette</li>
+             <li>Calculator/Computer</li>
+         </ol>
+        
+         <p>Students who violate these rules (a-f) will have their items confiscated.</p>
+         <br/>
+         
+         <p><strong>VISITING TIME</strong></p>
+         <p>Visit to Students in the hostels is restricted to the following period;</p>
+         <ol type="a">             
+             <li>Mondays to Fridays 4pm-7pm</li>
+             <li>Public holidays 10:00am- 9:00pm</li>
+             <li>After the time limit set in (a) and (b) above, visitors shall be allowed only into the porters lodges.</li>
+             <li>The Visitors should sign the visitors' book in the porters lodge before going into the students' room and MUST also sign the book before leaving the hostels.</li>
+             <li>Visitors are NOT allowed in the Students' room over night</li>
+             <li>The gate to the hostel will be closed between the hours of 12 midnight and 5 am daily.</li>
+         </ol>
+       
+         
+         
+	<h:form id="hostelApplicationStatusForm">
+           <br/>
+           <p> <h:selectBooleanCheckbox id="rulescheckbox" value="#{applicationStatusBean.agreedToRegulations}" />
+               I have carefully read the hostel rules and regulations and I promise to abide by them, if found wanting in any area I will accept whatever discipline is given to me by the school authorities.</p>
+                                  
+            <h:commandButton id="agreetorules" value="I Agree" onclick="if(!confirmCheckBox()){return false;}"
+                action="#{applicationStatusBean.acceptHostelRegulations}" rendered="#{applicationStatusBean.loggedIn}"/>
+                              
+           
+          </h:form>
+    </p:panel>
+    
+
+</ui:define>
+
+</ui:composition>

@@ -1,0 +1,121 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="templates/template.xhtml">
+
+    <ui:define name="content">
+        
+    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+    
+    <p:panel rendered="#{applicationBean.hasApplicationEnded}">        	
+        <f:facet name="header">Hostel Application</f:facet>
+        <br/>
+            <p style="color: red"><strong>Hostel Application ended on #{applicationBean.hostelApplicationEndDate}</strong></p>
+        <br/>
+    </p:panel>
+
+    <p:panel rendered="#{!applicationBean.studentTypeSelected and !applicationBean.hasApplicationEnded}">        	
+         <f:facet name="header">Select Category</f:facet>	
+         		
+	<h:form id="studentCategoryForm">           
+            <p:panelGrid columns="2" columnClasses="label, value">
+            <h:outputText value="Category" />
+            <h:selectOneMenu id="gender" value="#{applicationBean.hostelStudentType}">
+                <f:selectItem id="eligible" itemLabel="Eligible(Picked Yes on Ballot)" itemValue="Eligible"/>
+                <f:selectItem id="sports" itemLabel="Sports" itemValue="Sports"/>
+                <f:selectItem id="specialrequest" itemLabel="Special Request" itemValue="Special Request"/>
+                <f:selectItem id="scholarship" itemLabel="Scholarship" itemValue="Scholarship"/>
+                <f:selectItem id="handicap" itemLabel="Physically Challenged" itemValue="Handicap"/>
+                <f:selectItem id="firstyear" itemLabel="Year One" itemValue="Year One"/>  
+                <f:selectItem id="postgraduate" itemLabel="Post Graduate" itemValue="Post Graduate"/>
+                <f:selectItem id="supplementary" itemLabel="Supplementary" itemValue="Supplementary"/>
+                <f:selectItem id="medicalstudent" itemLabel="Medical Student" itemValue="Medical Student"/>
+                <f:selectItem id="HallHostels" itemLabel="Hall 7 Hostels" itemValue="Hall 7 Hostels"/>
+            </h:selectOneMenu>            
+            </p:panelGrid>
+            <br/>
+            <h:commandButton id="selectCategory" value="Select Category"
+                     action="#{applicationBean.selectStudentType}" rendered="#{!applicationBean.studentTypeSelected}"/>
+                               
+          </h:form>
+    </p:panel>
+           
+    <p:panel rendered="#{applicationBean.studentTypeSelected}">        	
+        <f:facet name="header">Hostel Application</f:facet>			
+        <h:form id="hostelApplicationForm">        
+            <p:panelGrid columns="2" columnClasses="label, value">
+            <h:outputText value="Academic Session" />
+            <h:inputText id="academicSession" readonly="true" value="#{hostelSettingsHelper.currentAcademicSession.sessionName}"/>
+
+            <h:outputText value="Student Number" />
+            <h:inputText id="studentNumber" required="true" value="#{applicationBean.hostelApplication.studentNumber}"/>
+
+            <h:outputText value="First Name" />
+            <h:inputText id="firstName" required="true" value="#{applicationBean.hostelApplication.firstName}"/>
+
+            <h:outputText value="Surname" />
+            <h:inputText id="lastName" required="true" value="#{applicationBean.hostelApplication.lastName}"/>
+
+            <h:outputText value="Other Names" />
+            <h:inputText id="otherNames" required="false" value="#{applicationBean.hostelApplication.otherNames}"/>
+               
+            <h:outputText value="Gender" />
+            <h:selectOneMenu id="gender" value="#{applicationBean.hostelApplication.gender}">
+                <f:selectItem id="male" itemLabel="MALE" itemValue="MALE"/>
+                <f:selectItem id="female" itemLabel="FEMALE" itemValue="FEMALE"/>                           
+            </h:selectOneMenu>
+                                
+            <h:outputText value="Phone Number" />
+            <h:inputText id="phoneNumber" required="true" value="#{applicationBean.hostelApplication.phoneNumber}"/>
+                    
+            <h:outputText value="Email" />
+            <h:inputText id="email" required="true" value="#{applicationBean.hostelApplication.email}"/>
+                                    
+            <h:outputText value="Year of Study" />
+            <h:selectOneMenu id="yearOfStudy" value="#{applicationBean.hostelApplication.yearOfStudy}">
+                <f:selectItem id="onelevel" itemLabel="100" itemValue="100"/>
+                <f:selectItem id="twolevel" itemLabel="200" itemValue="200"/>   
+                <f:selectItem id="threelevel" itemLabel="300" itemValue="300"/>
+                <f:selectItem id="fourlevel" itemLabel="400" itemValue="400"/>   
+                <f:selectItem id="fivelevel" itemLabel="500" itemValue="500"/>
+                <f:selectItem id="sixlevel" itemLabel="600" itemValue="600"/>   
+            </h:selectOneMenu>
+            
+            <h:outputText value="Faculty" />
+            <h:selectOneMenu id="faculty" required="true" value="#{applicationBean.facultyId}">
+                <f:ajax event="change" listener="#{applicationBean.updateDepartmentList}" render="department" />
+                <f:selectItem itemLabel="Select Faculty" itemValue="0" />
+                <f:selectItems value="#{hostelApplicationHelper.faculties}" var="facultyItem"
+                    itemLabel="#{facultyItem.name}" itemValue="#{facultyItem.id}"  />                        
+            </h:selectOneMenu>
+
+            <h:outputText value="Department" />
+            <h:selectOneMenu id="department" required="true" value="#{applicationBean.departmentId}">
+                <f:ajax event="change" listener="#{applicationBean.updateProgrammeOfStudyList}" render="programmeOfStudy"/>
+                <f:selectItem itemLabel="Select Department" itemValue="0" />
+                <f:selectItems id="departmentSelect" value="#{applicationBean.departments}" var="departmentItem" itemLabel="#{departmentItem.name}" 
+                               itemValue="#{departmentItem.id}"/>                             
+            </h:selectOneMenu>      
+
+            <h:outputText value="Course of Study" />                    
+            <h:selectOneMenu id="programmeOfStudy" required="true" value="#{applicationBean.cosId}">
+                <f:selectItem itemLabel="Select Course of Study" itemValue="0" />
+                <f:selectItems value="#{applicationBean.programmeOfStudyList}" var="programmeOfStudyItem" itemLabel="#{programmeOfStudyItem.name}" 
+                               itemValue="#{programmeOfStudyItem.id}"/>
+
+            </h:selectOneMenu>    
+            
+            </p:panelGrid>
+            <br/>
+                  
+            <h:commandButton id="continue" value="Confirm Application" action="#{applicationBean.confirmHostelApplication}"/>            
+        </h:form>       
+        </p:panel>
+
+    </ui:define>
+
+</ui:composition>

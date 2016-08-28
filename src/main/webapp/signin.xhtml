@@ -1,0 +1,32 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="templates/template.xhtml">
+    
+<ui:define name="content">
+
+    <p:panel>        	
+        <f:facet name="header">Sign in</f:facet>	
+        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+        
+        <h:form id="loginForm" prependId="false">       
+            <p:panelGrid columns="2" columnClasses="label, value">
+                <h:outputText value="Username" /> 
+                <h:inputText id="username" required="true" />
+           
+                <h:outputText value="Password" />         
+                <h:inputSecret id="password" validatorMessage="Password is required " required="true" label="password" />
+                
+                <h:outputText value="Remember me" />         
+                <h:selectBooleanCheckbox  id="remember-me" />  
+            </p:panelGrid>
+            <br/>
+            <h:commandButton  id="login" value="Sign In" action="#{loginController.doLogin}" />      
+        </h:form>
+    </p:panel>     
+
+</ui:define>
+
+</ui:composition>

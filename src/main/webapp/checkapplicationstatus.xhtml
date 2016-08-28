@@ -1,0 +1,36 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="templates/template.xhtml">
+    
+<ui:define name="content">
+
+    <p:panel rendered="#{!applicationStatusBean.loggedIn}">        	
+    <f:facet name="header">Check Hostel Application</f:facet>	
+        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+        <h:form id="hostelApplicationStatusForm">
+            <p:panelGrid columns="2" columnClasses="label, value">
+            <h:outputText value="Student Number"/>
+            <h:inputText id="studentNumber" required="true" value="#{applicationStatusBean.studentNumber}"/>
+
+            <h:outputText value="Application Number"/>
+            <h:inputText id="requestNumber" required="true" value="#{applicationStatusBean.applicationNumber}"/>
+                                                     
+            </p:panelGrid>
+            <br/>
+            <h:commandButton id="checkStatus"
+                      value="Check Hostel Application Status"
+                     action="#{applicationStatusBean.checkHostelApplication}" rendered="#{!applicationStatusBean.loggedIn}"/>
+                        
+          </h:form>
+    </p:panel>
+    
+        
+
+</ui:define>
+
+</ui:composition>

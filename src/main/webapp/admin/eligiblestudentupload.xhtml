@@ -1,0 +1,104 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="admintemplate.xhtml"> 
+
+<ui:define name="content">
+
+    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+       
+    <p:panel>
+        <f:facet name="header">Upload Student Eligible for Hostel (Use standard excel file template)</f:facet>
+        <br/>
+        <h:form enctype="multipart/form-data">
+            <p:growl id="Uploadmessages" showDetail="true" />
+            <p:fileUpload value="#{eligibleStudentUploadBean.uploadedFile}" mode="simple" />
+            <p:commandButton value="Submit" ajax="false" actionListener="#{eligibleStudentUploadBean.uploadFile}" />
+        </h:form>    
+               
+        <br/>
+            
+    </p:panel>
+        
+    <p:panel rendered="#{eligibleStudentUploadBean.uploadedEligibleStudents != null 
+                             and eligibleStudentUploadBean.uploadedEligibleStudents.size() > 0}">
+            <f:facet name="header">Uploaded Students</f:facet>            
+                
+            <h:outputText id="NoUploadedStudentFoundMessage" value="No Student Uploaded Found" rendered="#{eligibleStudentUploadBean.uploadedEligibleStudents != null 
+                and eligibleStudentUploadBean.uploadedEligibleStudents.size() == 0}"/>
+            
+            <p:dataTable id="uploadedEligibleStudents" value="#{eligibleStudentUploadBean.uploadedEligibleStudents}" var="uploadEligibleStudent" 
+                         rendered="#{eligibleStudentUploadBean.uploadedEligibleStudents.size() > 0}">
+                <p:column headerText="No">                    
+                    <h:outputText value="#{eligibleStudentUploadBean.uploadRowIndex}" />
+                </p:column>
+                <p:column id="ustudentNumber" headerText="Student Number">                    
+                    <h:outputText value="#{uploadEligibleStudent.studentNumber}" />
+                </p:column>
+                <p:column id="ustudentName" headerText="Name">                    
+                    <h:outputText value="#{uploadEligibleStudent.firstName}" />
+                </p:column>                        
+                <p:column id="udepartment" headerText="Department">                    
+                    <h:outputText value="#{uploadEligibleStudent.department}" />					
+                </p:column>                               
+                <p:column id="studentType" headerText="Student Type">                    
+                    <h:outputText value="#{uploadEligibleStudent.hostelStudentType.studentType}" />					
+                </p:column>
+            </p:dataTable>
+        </p:panel>
+        <br/><br/>
+        <p:panel>
+            <f:facet name="header">Student Search</f:facet>
+            <h:form id="search"> 
+                <br/><br/>        
+                <h:outputText value="Search By" /><p:spacer width="10" height="10" />
+                <h:inputText id="searchParam" required="true" value="#{eligibleStudentUploadBean.searchParam}"/>
+                <br/><br/> 
+                <h:commandButton id="searchFeePaymentAdmin" value="Search" action="#{eligibleStudentUploadBean.search}" />
+                <br/>                 
+            </h:form>            
+        </p:panel>        
+        
+        <p:panel>
+            <f:facet name="header">Search Result</f:facet>            
+                
+            <h:outputText id="NoStudentFoundMessage" value="No Student Found" 
+                rendered="#{eligibleStudentUploadBean.eligibleStudents != null and eligibleStudentUploadBean.eligibleStudents.size() == 0}"/>
+            
+            <p:dataTable id="eligibleStudents" value="#{eligibleStudentUploadBean.eligibleStudents}" var="eligibleStudent" 
+                rows="10"  paginator="true" paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                rowsPerPageTemplate="5,10,15" rendered="#{eligibleStudentUploadBean.eligibleStudents.size() > 0}">
+                
+                <p:column id="ustudentNumber" headerText="Student Number">                    
+                    <h:outputText value="#{eligibleStudent.studentNumber}" />
+                </p:column>
+                <p:column id="ustudentName" headerText="Name">                    
+                    <h:outputText value="#{eligibleStudent.firstName}" />
+                </p:column>                        
+                <p:column id="udepartment" headerText="Department">                    
+                    <h:outputText value="#{eligibleStudent.department}" />					
+                </p:column>                
+                <!--
+                <p:column id="uyearOfStudy" headerText="Year of Study">                    
+                    <h:outputText value="#{eligibleStudent.yearOfStudy}" />					
+                </p:column>
+                -->
+                <p:column id="studentType" headerText="Student Type">                    
+                    <h:outputText value="#{eligibleStudent.hostelStudentType.studentType}" />					
+                </p:column>                
+                <p:column id="dateUploaded" headerText="DateUploaded">                    
+                    <h:outputText value="#{eligibleStudent.dateUploaded}	" >
+                        <f:convertDateTime pattern="dd-MMM-yyyy HH:mm"/>
+                    </h:outputText>
+                </p:column>                
+            </p:dataTable>
+                
+        </p:panel>
+                
+    </ui:define>
+
+</ui:composition>

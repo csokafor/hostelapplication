@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:f="http://java.sun.com/jsf/core">
+
+	<h:head>		
+		<h:outputStylesheet name="orange.css" library="css" />
+		<h:outputStylesheet name="style.css" library="css" />                
+		<h:outputStylesheet name="js-image-slider.css" library="css" />
+		<h:outputScript name="js-image-slider.js" library="css" />                
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+                <title>Student Affairs</title>
+	</h:head>
+    
+    <h:body>
+        <h:outputStylesheet name="primeface_ext.css" library="css" />
+	<div id="main">
+		<div id="links"><a href="#">Student Affairs</a> | <a href="#">Students</a></div>
+		<div id="logo"><h1>Student Affairs</h1><h2></h2></div>
+		<div id="menu">
+	      <ul>        
+	        <li><a href="index.xhtml">home</a></li>        
+	      </ul>
+	    </div>		
+    	<div id="content">
+    	<div id="column1">
+    		<div class="sidebaritem">
+	          <h1>Ballot</h1>
+	          <div class="sbilinks">	            
+	            <ul>
+	              <li><a href="hostelballotapplication.xhtml">Ballot Application</a></li>
+	              <li><a href="checkballotstatus.xhtml">Check Ballot Status</a></li>	              
+	            </ul>
+	          </div>
+	        </div>
+	        <div class="sidebaritem">
+	          <h1>Hostel Application</h1>
+	          <div class="sbilinks">	           
+	            <ul>
+	              <li><a href="hostelapplication.xhtml">Hostel Application</a></li>
+	              <li><a href="checkapplicationstatus.xhtml">Check Hostel Application</a></li>	              
+	            </ul>
+	          </div>
+	        </div>
+	        <div class="sidebaritem">
+	          <h1>other information</h1>
+	          <!-- **** INSERT OTHER INFORMATION HERE **** -->
+	          
+	        </div>
+	    </div>
+	    <div id="column2">
+	    	<ui:insert name="content" />
+	    </div>
+    	</div>
+    	<div id="footer">Copyright &copy; 2016 Hostel Application</div>
+    </div>
+    
+    </h:body>
+
+</html>

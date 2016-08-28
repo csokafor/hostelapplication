@@ -1,0 +1,59 @@
+<persistence version="1.0"
+	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+	
+	<persistence-unit name="hostelPU"  transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.ejb.HibernatePersistence</provider>		
+		<class>com.perblo.hostel.entity.AcademicSession</class>
+		<class>com.perblo.hostel.entity.Course</class>
+		<class>com.perblo.hostel.entity.CourseTitle</class>
+		<class>com.perblo.hostel.entity.Department</class>
+		<class>com.perblo.hostel.entity.EligibleBallotStudent</class>
+		<class>com.perblo.hostel.entity.EligibleStudent</class>
+		<class>com.perblo.hostel.entity.Faculty</class>
+		<class>com.perblo.hostel.entity.Hostel</class>
+		<class>com.perblo.hostel.entity.HostelAllocation</class>
+		<class>com.perblo.hostel.entity.HostelApplication</class>
+		<class>com.perblo.hostel.entity.HostelAuditLog</class>
+		<class>com.perblo.hostel.entity.HostelBallotApplication</class>
+		<class>com.perblo.hostel.entity.HostelBallotQuota</class>
+		<class>com.perblo.hostel.entity.HostelRoom</class>
+		<class>com.perblo.hostel.entity.HostelRoomBedSpace</class>
+		<class>com.perblo.hostel.entity.HostelSetting</class>
+		<class>com.perblo.hostel.entity.HostelStudentType</class>
+		<class>com.perblo.hostel.entity.Nationality</class>
+		<class>com.perblo.hostel.entity.ProgrammeOfStudy</class>
+		<class>com.perblo.hostel.entity.Role</class>
+		<class>com.perblo.hostel.entity.SchoolYear</class>
+		<class>com.perblo.hostel.entity.Semester</class>
+		<class>com.perblo.hostel.entity.Student</class>
+		<class>com.perblo.hostel.entity.StudentFeePayment</class>
+		<class>com.perblo.hostel.entity.Tab</class>
+		<class>com.perblo.hostel.entity.UnpaidHostelAllocation</class>
+		<class>com.perblo.hostel.entity.User</class>		
+		
+		<class>com.perblo.payment.entity.PaymentItem</class>
+		<class>com.perblo.payment.entity.PaymentSetting</class>
+		<class>com.perblo.payment.entity.PaymentTransaction</class>
+		<class>com.perblo.payment.entity.Pin</class>
+		<class>com.perblo.payment.entity.TransactionType</class>
+				
+		<properties>			
+			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
+			<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/hostel?useEncoding=true&amp;characterEncoding=UTF-8" />
+                        
+			<property name="hibernate.connection.username" value="root" />
+			<property name="hibernate.connection.password" value="password" />                      
+			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
+			<property name="hibernate.connection.provider_class"
+				value="org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider" />
+			<property name="hibernate.hbm2ddl.auto" value="update" />
+			<property name="hibernate.c3p0.max_size" value="30" />
+			<property name="hibernate.c3p0.min_size" value="5" />
+			<property name="hibernate.c3p0.acquire_increment" value="5" />
+			<property name="hibernate.c3p0.idle_test_period" value="1000" />
+			<property name="hibernate.c3p0.max_statements" value="100" />
+			<property name="hibernate.c3p0.timeout" value="100" />
+		</properties>
+	</persistence-unit>
+</persistence>

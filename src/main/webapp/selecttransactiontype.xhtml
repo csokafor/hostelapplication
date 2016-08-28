@@ -1,0 +1,50 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="templates/template.xhtml">
+
+    <ui:define name="content">
+        
+    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+	
+        <p:panel rendered="#{!paymentBean.paymentSuccessful}">
+            <f:facet name="header">Select Payment Option</f:facet>
+            <h:form id="transactionTypeForm">
+            <p:panelGrid columns="2" columnClasses="label, value"> 
+                                
+                <h:outputText value="Total Amount"/>
+                <h:outputText id="TotalAmount" value="#{paymentBean.totalPaymentAmount}">        
+                	<f:convertNumber type="currency" currencySymbol="=N="/>
+                </h:outputText>            
+                
+                <h:selectOneRadio id="transactionTypes" value="#{paymentBean.transactionTypeId}">
+                    <f:selectItems value="#{paymentBean.transactionTypes}" var="transactionType" itemLabel="#{transactionType.name}" 
+                               itemValue="#{transactionType.id}"/>                     
+                </h:selectOneRadio>               
+            </p:panelGrid>
+            <br/>
+            <h:commandButton id="continue" value="Continue"
+                        action="#{paymentBean.selectTransactionType}" />
+
+            <h:commandButton id="cancel" value="Cancel" action="#{paymentBean.cancel}" />
+
+                   
+            </h:form>
+        </p:panel>
+
+    <p:panel rendered="#{paymentBean.paymentSuccessful}">
+        <f:facet name="header">Your previous payment was successful.</f:facet>
+		<h:form id="paymentSuccessForm">
+            
+                <h:commandButton id="cancel" value="Cancel" action="#{paymentBean.cancel}" />
+            
+        </h:form>
+    </p:panel>
+
+</ui:define>
+
+</ui:composition>

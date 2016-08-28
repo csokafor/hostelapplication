@@ -1,0 +1,52 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="templates/template.xhtml">
+
+    <ui:define name="content">
+	
+        <p:panel>
+            <f:facet name="header">#{paymentBean.transactionType.name} Payment</f:facet>    
+            <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+            <h:form id="transcriptPaymentForm">		            
+		<p:panelGrid columns="2" columnClasses="label, value">  
+                <h:outputText value="Payment Item" />
+                <h:outputText id="paymentItem" value="#{paymentBean.paymentItemName}"/>
+
+                <h:outputText value="Request Number" />
+                <h:outputText id="requestNumber" value="#{paymentBean.payeeIdentifier}"/>
+
+                <h:outputText value="Total Amount" />
+                <h:outputText id="TotalAmount" value="#{paymentBean.totalPaymentAmount}">        
+                        <f:convertNumber type="currency" currencySymbol="=N="/>
+                </h:outputText>              
+
+                <h:outputText rendered="#{!paymentBean.paymentSuccessful}" value="Pin Number" />		            
+                <h:inputSecret rendered="#{!paymentBean.paymentSuccessful}" id="pinNumber" required="true" value="#{paymentBean.pinNumber}"/>
+
+                <h:outputText value="Payment Status" />
+                <h:outputText rendered="#{paymentBean.paymentSuccessful}" value="Payment Successful" />
+                <h:outputText rendered="#{!paymentBean.paymentSuccessful}" value="Payment Not Successful" />
+				        
+                </p:panelGrid>        
+                <br/>
+                            					             
+                <h:commandButton id="pay" value="Pay"
+                    action="#{paymentBean.processPinPayment}" rendered="#{!paymentBean.paymentSuccessful}"/>
+
+                <h:commandButton id="cancel"  value="Cancel"
+                    action="#{paymentBean.cancel}" rendered="#{!paymentBean.paymentSuccessful}"/>
+
+                <h:commandButton id="close" value="Close"
+                    action="#{paymentBean.close}" rendered="#{paymentBean.paymentSuccessful}"/>
+              		                	
+            </h:form>		
+        </p:panel>    
+      
+</ui:define>
+
+</ui:composition>

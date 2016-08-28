@@ -1,0 +1,64 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="admintemplate.xhtml"> 
+
+<ui:define name="content">
+
+    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+    
+    <p:panel>        	
+        <f:facet name="header">Check Pin Status</f:facet>	         		
+        <h:form id="pinStatusForm">
+            <br/>
+            <br/>
+            <h:outputText value="Serial Number" />
+            <p:spacer width="10" height="10" />
+            <h:inputText id="serialNumber" required="true" value="#{pinAdminBean.serialNumber}"/>                           
+            <br/>
+            <br/>
+            <h:commandButton id="checkStatus" value="Check Status"  action="#{pinAdminBean.checkPinStatus}"/>
+
+            <br/>
+
+        </h:form>
+    </p:panel>
+    
+    
+    <p:panel id="pinInfo" rendered="#{pinAdminBean.pin ne null}">
+        <f:facet name="header">Pin Details</f:facet>
+        <p:panelGrid columns="2" columnClasses="label, value">
+                
+            <h:outputText value="Batch Number" />
+            <h:outputText value="#{pinAdminBean.pin.batchNumber}" />
+            
+            <h:outputText value="Serial Number" />
+            <h:outputText value="#{pinAdminBean.pin.serialNumber}" />
+            
+            <h:outputText value="Amount" />
+            <h:outputText style="font-weight:bold" value="=N= #{pinAdminBean.pin.pinValue}" />
+            
+            <h:outputText value="Enabled" />
+            <h:outputText value="#{pinAdminBean.pin.enabled}" />
+            
+            <h:outputText value="Used Status" />
+            <h:outputText style="font-weight:bold"  value="#{pinAdminBean.pin.usedStatus}" />
+            
+            <h:outputText value="Date used" rendered="#{pinAdminBean.pin.usedStatus}" />
+            <h:outputText style="font-weight:bold"  rendered="#{pinAdminBean.pin.usedStatus}" value="#{pinAdminBean.pin.dateUsed}" >
+                <f:convertDateTime pattern="dd-MMM-yyyy HH:mm"/>
+            </h:outputText> 
+            
+            <h:outputText rendered="#{pinAdminBean.pin.usedStatus}" value="Used By" />            
+            <h:outputText style="font-weight:bold" rendered="#{pinAdminBean.pin.usedStatus}" value="#{pinAdminBean.getPinUser(pinAdminBean.pin.pinNumber)}" />            
+            
+        </p:panelGrid>
+            
+    </p:panel>          
+   
+</ui:define>
+</ui:composition>

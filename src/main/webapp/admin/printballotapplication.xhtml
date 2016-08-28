@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:f="http://java.sun.com/jsf/core"
+      >
+
+    <h:head>		
+            <h:outputStylesheet name="print-orange.css" library="css" />
+            <h:outputStylesheet name="print-style.css" library="css" />        		          
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <meta name="viewport" content="width=device-width,initial-scale=1" />
+            <title>#{hostelSettingsHelper.getSchoolName()} Hostel Management System</title>
+    </h:head>
+    
+    <h:body onload="window.print()">
+        <h:outputStylesheet name="primeface_ext.css" library="css" />    
+        <div id="main">
+            <div id="logo"><h1>University of Calabar Student Affairs Division</h1><h2></h2></div>
+            
+            <div id="content">
+                <br/>
+            <p:panel>
+                <f:facet name="header">Hostel Ballot Information</f:facet>
+                <p:panelGrid style="background: #FFFFFF;" columns="2" columnClasses="label, value">                 
+                <h:outputText value="Application Number" />
+                <h:outputText style="font-weight:bold" value="#{hostelBallotSearchBean.hostelBallotApplication.applicationNumber}" /> 
+
+                <h:outputText value="Registration Number" />
+                <h:outputText style="font-weight:bold" value="#{hostelBallotSearchBean.hostelBallotApplication.studentNumber} " />
+
+                <h:outputText value="First Name" />
+                <h:outputText style="font-weight:bold" value="#{hostelBallotSearchBean.hostelBallotApplication.firstName}   " />
+
+                <h:outputText value="Surname" />
+                <h:outputText style="font-weight:bold" value="#{hostelBallotSearchBean.hostelBallotApplication.lastName}" />
+
+                <h:outputText value="Other Names" />
+                <h:outputText  id="otherNames"  value="#{hostelBallotSearchBean.hostelBallotApplication.otherNames}"/>             
+
+                <h:outputText value="Gender" />
+                <h:outputText  style="font-weight:bold" id="gender"  value="#{hostelBallotSearchBean.hostelBallotApplication.gender}"/>
+
+                <h:outputText value="Phone Number" />
+                <h:outputText  id="phoneNumberField"  value="#{hostelBallotSearchBean.hostelBallotApplication.phoneNumber}"/>
+
+                <h:outputText value="Email" />
+                <h:outputText  id="emailField"  value="#{hostelBallotSearchBean.hostelBallotApplication.email}"/>
+
+                <h:outputText value="Faculty" />
+                <h:outputText  style="font-weight:bold" id="facultyField"  value="#{hostelBallotSearchBean.hostelBallotApplication.faculty.name}"/>
+
+                <h:outputText value="Department" />
+                <h:outputText  style="font-weight:bold" id="departmentField"  value="#{hostelBallotSearchBean.hostelBallotApplication.department.name}"/>
+
+                <h:outputText value="Course of Study" />
+                <h:outputText  id="programmeOfStudyField"  value="#{hostelBallotSearchBean.hostelBallotApplication.programmeOfStudy.name}"/>
+                
+                <h:outputText value="Ballot" />
+                <h:outputText  value="#{hostelBallotSearchBean.getBallotStatus(hostelBallotSearchBean.hostelBallotApplication.ballotStatus)}"/>
+                
+                </p:panelGrid>
+            </p:panel>   
+            </div>
+            <br/>        
+        
+	<br/>
+        <div id="footer">
+	    &copy; 2015 #{hostelSettingsHelper.getSchoolName()} Powered by Anamme 
+	</div>
+           
+        	  
+    </div>
+</h:body>
+</html>

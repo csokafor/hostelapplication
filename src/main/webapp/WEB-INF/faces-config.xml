@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+
+<faces-config
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
+    version="2.2">
+    
+    <lifecycle>
+        <phase-listener>com.perblo.security.LoginController</phase-listener>
+    </lifecycle>
+    <application>
+	
+	<locale-config>
+            <default-locale>en</default-locale>
+	</locale-config>
+	
+	<resource-bundle>
+		<base-name>messages</base-name>
+		<var>msg</var>
+	</resource-bundle>
+    </application>
+    <!--
+    <navigation-rule>
+        <from-view-id>/hostelapplication.xhtml</from-view-id>
+        <navigation-case>
+            <from-action>#{applicationBean.confirmHostelApplication}</from-action>    
+            <for-outcome>applicationconfirmation</for-outcome>            
+            <to-view-id>/applicationconfirmation.xhtml</to-view-id>
+         </navigation-case>
+         <navigation-case>
+            <from-action>#{applicationBean.confirmHostelApplication}</from-action>    
+            <for-outcome>hostelapplication</for-outcome>            
+            <to-view-id>/hostelapplication.xhtml</to-view-id>
+         </navigation-case>
+    </navigation-rule>
+-->
+    <navigation-rule>
+        <from-view-id>/applicationconfirmation.xhtml</from-view-id>            
+        <navigation-case>
+            <from-action>#{applicationBean.confirmPayment}</from-action>
+            <for-outcome>true</for-outcome>
+            <to-view-id>/paymentconfirmation.xhtml</to-view-id>                
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{applicationBean.confirmPayment}</from-action>
+            <for-outcome>false</for-outcome>
+            <to-view-id>/checkapplicationstatus.xhtml</to-view-id>                
+        </navigation-case>
+        <navigation-case>
+            <from-action>#{applicationBean.close}</from-action>
+            <to-view-id>/checkapplicationstatus.xhtml</to-view-id>
+        </navigation-case>
+         <navigation-case>
+            <from-action>#{applicationBean.cancel}</from-action> 
+            <to-view-id>/hostelapplication.xhtml</to-view-id>
+         </navigation-case>
+         <navigation-case>
+            <from-action>#{applicationBean.editHostelApplication}</from-action> 
+            <to-view-id>/hostelapplication.xhtml</to-view-id>
+         </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/hostelballotapplication.xhtml</from-view-id>
+        <navigation-case>
+            <from-action>#{ballotBean.close}</from-action>                
+            <to-view-id>/checkballotstatus.xhtml</to-view-id>
+         </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule>
+        <from-view-id>/checkballotstatus.xhtml</from-view-id>
+        <navigation-case>
+            <from-action>#{ballotStatusBean.close}</from-action>                
+            <to-view-id>/index.xhtml</to-view-id>
+         </navigation-case>
+    </navigation-rule>        
+
+    <navigation-rule>
+        <from-view-id>/pinpayment.xhtml</from-view-id>
+        <navigation-case>
+            <from-action>#{applicationBean.cancel}</from-action>                
+            <to-view-id>/index.xhtml</to-view-id>
+         </navigation-case>
+         <navigation-case>
+            <from-action>#{applicationBean.close}</from-action>                
+            <to-view-id>/index.xhtml</to-view-id>
+         </navigation-case>
+    </navigation-rule>     
+    
+    <navigation-rule>
+        <from-view-id>/hostelregulations.xhtml</from-view-id>
+        <navigation-case>
+            <from-action>#{applicationStatusBean.checkHostelApplication}</from-action>    
+            <for-outcome>true</for-outcome>            
+            <to-view-id>/updateapplicationstatus.xhtml</to-view-id>
+         </navigation-case>         
+    </navigation-rule>
+    
+    <navigation-rule>
+        <from-view-id>/updateapplicationstatus.xhtml</from-view-id>
+        <navigation-case>
+            <from-action>#{applicationStatusBean.printApplicationStatus}</from-action>
+            <to-view-id>/printapplicationstatus</to-view-id>
+        </navigation-case>      
+        <navigation-case>
+            <from-action>#{applicationStatusBean.close}</from-action>                
+            <to-view-id>/index.xhtml</to-view-id>
+        </navigation-case>   
+        <navigation-case>
+            <from-action>#{applicationStatusBean.printApplicationStatus}</from-action>
+            <to-view-id>/printapplicationstatus</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+       
+
+</faces-config>

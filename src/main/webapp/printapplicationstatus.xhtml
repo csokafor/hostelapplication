@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:f="http://java.sun.com/jsf/core"
+      >
+
+	<h:head>		
+		<h:outputStylesheet name="print-orange.css" library="css" />
+		<h:outputStylesheet name="print-style.css" library="css" />        		          
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+                <title>#{hostelSettingsHelper.getSchoolName()} Hostel Management System </title>
+	</h:head>
+    
+    <h:body onload="window.print()">
+        <h:outputStylesheet name="primeface_ext.css" library="css" />    
+        <div id="main">
+            <div id="logo"><h1>University of Calabar Student Affairs Division</h1><h2></h2></div>
+				
+            <div id="content">
+                <br/>
+                <p:graphicImage rendered="#{applicationStatusBean.passport ne null}" 
+                        width="150" height="150" value="#{applicationStatusBean.passport}" >                
+                </p:graphicImage>
+                <br/>
+                <p:panelGrid style="background: #FFFFFF;" columns="2" columnClasses="label, value">                 
+                <h:outputText value="Application Number" />
+                <h:outputText style="font-weight:bold" value="#{applicationStatusBean.hostelApplication.applicationNumber}" /> 
+
+                <h:outputText value="Application Date" />
+                <h:outputText id="requestDateS" value="#{applicationStatusBean.applicationDate}" /> 			 
+
+                <h:outputText value="Registration Number" />
+                <h:outputText style="font-weight:bold" value="#{applicationStatusBean.hostelApplication.studentNumber} " />
+
+                <h:outputText value="First Name" />
+                <h:outputText style="font-weight:bold" value="#{applicationStatusBean.hostelApplication.firstName}   " />
+
+                <h:outputText value="Surname" />
+                <h:outputText style="font-weight:bold" value="#{applicationStatusBean.hostelApplication.lastName}" />
+
+                <h:outputText value="Other Names" />
+                <h:outputText  id="otherNames"  value="#{applicationStatusBean.hostelApplication.otherNames}"/>             
+
+                <h:outputText value="Gender" />
+                <h:outputText  style="font-weight:bold" id="gender"  value="#{applicationStatusBean.hostelApplication.gender}"/>
+
+                <h:outputText value="Phone Number" />
+                <h:outputText  id="phoneNumberField"  value="#{applicationStatusBean.hostelApplication.phoneNumber}"/>
+
+                <h:outputText value="Email" />
+                <h:outputText  id="emailField"  value="#{applicationStatusBean.hostelApplication.email}"/>
+
+                <h:outputText value="Faculty" />
+                <h:outputText  style="font-weight:bold" id="facultyField"  value="#{applicationStatusBean.hostelApplication.faculty.name}"/>
+
+                <h:outputText value="Department" />
+                <h:outputText  style="font-weight:bold" id="departmentField"  value="#{applicationStatusBean.hostelApplication.department.name}"/>
+
+                <h:outputText value="Course of Study" />
+                <h:outputText  id="programmeOfStudyField"  value="#{applicationStatusBean.hostelApplication.programmeOfStudy.name}"/>
+
+                <h:outputText value="Year of Study" />
+                <h:outputText  id="yearOfAdmissionField"  value="#{applicationStatusBean.hostelApplication.yearOfStudy}"/>
+
+                <h:outputText value="Type" />
+                <h:outputText  value="#{applicationStatusBean.hostelApplication.studentType.studentType}"/>
+
+                <h:outputText value="Ballot" />
+                <h:outputText  value="#{applicationStatusBean.ballotStatus}"/>
+
+                <h:outputText value="Allocated Room" rendered="#{applicationStatusBean.hasPaid}"/>
+                <h:outputText style="font-weight:bold" rendered="#{applicationStatusBean.hasPaid}" value="#{applicationStatusBean.hostelApplication.hostelAllocation.hostelRoom.hostel.hostelName}, 
+                               Room #{applicationStatusBean.hostelApplication.hostelAllocation.hostelRoom.roomNumber} 
+                               (#{applicationStatusBean.hostelApplication.hostelAllocation.hostelRoomBedSpace.position})"/>
+
+                <h:outputText value="Total Amount" />
+                <h:outputText style="font-weight:bold" id="TotalAmount" value="#{applicationStatusBean.hostelApplication.totalAmount}">        
+                        <f:convertNumber type="currency" currencySymbol="=N="/>
+                </h:outputText>  
+
+                <h:outputText value="Payment Status" />
+                <h:outputText style="font-weight:bold" value="#{applicationStatusBean.paymentStatus}"/>
+                </p:panelGrid>
+                <br/>
+                <h:selectBooleanCheckbox id="rulescheckbox" value="#{true}"  />
+                   I have carefully read the hostel rules and regulations and I promise to abide by them, if found wanting in any area I will accept whatever discipline is given to me by the school authorities.
+            
+            </div>
+            <br/>
+        
+        <div>
+            <!--
+            <p:barcode value="#{applicationStatusBean.hostelApplication.applicationNumber}" type="ean13" /> 
+            -->
+            <p:barcode value="#{applicationStatusBean.barCodeApplicationNumber}" type="postnet" />
+        </div>
+	<br/>
+        <div id="footer">
+	    &copy; 2015 #{hostelSettingsHelper.getSchoolName()} Powered by Anamme - #{applicationStatusBean.barCodeApplicationNumber}
+	</div>
+	  
+    </div>
+</h:body>
+
+</html>

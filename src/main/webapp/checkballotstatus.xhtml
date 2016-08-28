@@ -1,0 +1,59 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="templates/template.xhtml">
+    
+<ui:define name="content">
+
+    <p:panel rendered="#{!ballotStatusBean.loggedIn}">        	
+        <f:facet name="header">Check Ballot Application</f:facet>	
+        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+        
+	<h:form id="hostelApplicationStatusForm">            
+            <p:panelGrid columns="2" columnClasses="label, value">
+                <h:outputText value="Student Number" /> 
+                <h:inputText id="studentNumber" required="true" value="#{ballotStatusBean.studentNumber}"/>           
+           
+                <h:outputText value="Ballot Number" />         
+                <h:inputText id="requestNumber" required="true" value="#{ballotStatusBean.applicationNumber}"/>                                                            
+            </p:panelGrid>
+            <br/>
+            <h:commandButton id="checkStatus" value="Check Ballot Status"
+                         action="#{ballotStatusBean.checkBallotApplication}" rendered="#{!ballotStatusBean.loggedIn}"/>
+                    
+        </h:form>
+    </p:panel>     
+    
+    <p:panel rendered="#{ballotStatusBean.loggedIn}"> 
+        <f:facet name="header">Ballot Information</f:facet>    
+        
+        <h:form id="hostelBallotStatusForm">
+            <p:panelGrid columns="2" columnClasses="label, value">
+
+                <h:outputText value="Ballot Number"/>
+                <h:outputText id="ballotNumber" value="#{ballotStatusBean.ballotApplication.applicationNumber}" />
+
+                <h:outputText value="Student Number" />
+                <h:outputText id="studentNumber" value="#{ballotStatusBean.ballotApplication.studentNumber}"/>
+
+                <h:outputText value="Name" />
+                <h:outputText id="firstName" 
+                    value="#{ballotStatusBean.ballotApplication.lastName}, #{ballotStatusBean.ballotApplication.firstName} #{ballotStatusBean.ballotApplication.otherNames}"/>
+
+                <h:outputText value="Ballot"/>
+                <h:outputText rendered="#{ballotStatusBean.ballotStatus == 1}" value="Congratulations you picked YES" />
+                <h:outputText rendered="#{ballotStatusBean.ballotStatus == 2}" value="Oops you picked NO" />                
+                                
+            </p:panelGrid>      
+            <br/>
+            <h:commandButton id="close" value="Close" action="#{ballotStatusBean.close}" />
+        </h:form>        
+    </p:panel>    
+        
+      
+
+</ui:define>
+
+</ui:composition>

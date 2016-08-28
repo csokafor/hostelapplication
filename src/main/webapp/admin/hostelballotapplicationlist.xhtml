@@ -1,0 +1,84 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="admintemplate.xhtml"> 
+
+<ui:define name="content">
+
+    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+    
+    <p:panel>
+    <f:facet name="header">Hostel Ballot Search</f:facet>
+    <h:form id="search">            
+        <p:panelGrid columns="2" columnClasses="label, value">
+        <h:outputText value="Search Parameter" />                
+        <h:inputText id="searchString" value="#{hostelBallotSearchBean.searchString}"/>
+        
+        <h:outputText value="Ballot Status" />                     
+        <h:selectOneMenu id="ballotStatus" value="#{hostelBallotSearchBean.ballotStatus}">            
+            <f:selectItem id="successful" itemLabel="SUCCESSFUL" itemValue="1"/>     
+            <f:selectItem id="unsuccessful" itemLabel="UNSUCCESSFUL" itemValue="2"/> 
+            <f:selectItem id="allRequestStatus" itemLabel="ALL" itemValue="-1"/>
+        </h:selectOneMenu>        
+                 
+        <h:outputText value="Start Date" />                     
+        <p:calendar value="#{hostelBallotSearchBean.searchStartDate}" pattern="dd/MM/yyyy" />
+
+        <h:outputText value="End Date" />                              
+        <p:calendar value="#{hostelBallotSearchBean.searchEndDate}" pattern="dd/MM/yyyy"/>                
+        </p:panelGrid>     
+        
+        <br/>     
+        <h:commandButton id="searchHostelApplication" value="Search" action="#{hostelBallotSearchBean.search}" />
+        <br/>
+    </h:form>
+    </p:panel>
+    
+    <p:panel>
+    <f:facet name="header">Search Result</f:facet>            
+    <h:form>
+        <h:outputText id="NoHostelApplicationsFoundMessage" value="No Ballot Application Found" 
+                      rendered="#{hostelBallotSearchBean.hostelBallotApplications != null and hostelBallotSearchBean.hostelBallotApplications.size() == 0}"/>
+        <br/>
+                
+        <p:dataTable id="hostelBallotApplications" value="#{hostelBallotSearchBean.hostelBallotApplications}" var="hostelBallotApplication" 
+            rows="10"  paginator="true" paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+            rowsPerPageTemplate="5,10,15"  rendered="#{hostelBallotSearchBean.hostelBallotApplications.size() > 0}">
+            
+            <p:column headerText="Student Number">                    
+                <h:outputText value="#{hostelBallotApplication.studentNumber}" />
+            </p:column>                                      
+            <p:column headerText="Student Name">                    
+                <h:outputText value="#{hostelBallotApplication.lastName}, #{hostelBallotApplication.firstName}" />
+            </p:column>
+            <p:column headerText="Application Number">                    
+                <h:outputText value="#{hostelBallotApplication.applicationNumber}" />
+            </p:column>
+            <p:column headerText="Application Date">                    
+                <h:outputText value="#{hostelBallotApplication.applicationDate}" >
+                    <f:convertDateTime pattern="dd-MMM-yyyy HH:mm"/>
+                </h:outputText>
+            </p:column>                   
+            <p:column headerText="Department">                    
+                <h:outputText value="#{hostelBallotApplication.department.name}" />
+            </p:column>            
+            <p:column headerText="Ballot Status">                    
+                <h:outputText value="#{hostelBallotSearchBean.getBallotStatus(hostelBallotApplication.ballotStatus)}" />
+            </p:column>
+                           
+            <p:column>
+                <p:commandButton value="View" title="View" action="#{hostelBallotSearchBean.getHostelBallotApplication(hostelBallotApplication)}">
+                    <f:setPropertyActionListener value="#{hostelBallotApplication}" target="#{hostelBallotSearchBean.hostelBallotApplication}" />
+                </p:commandButton>
+            </p:column>                
+        </p:dataTable>
+    </h:form>
+    </p:panel>
+        
+    </ui:define>
+
+</ui:composition>

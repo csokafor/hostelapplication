@@ -1,0 +1,132 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="admintemplate.xhtml"> 
+
+<ui:define name="content">
+                             
+    <p:panel>        	
+    <f:facet name="header">Hostel Allocation</f:facet>	                                      
+    <p:panelGrid columns="2" columnClasses="label, value">
+        <h:outputText value="Student Number" />
+        <h:outputText id="studentNumber" value="#{hostelAppSupportBean.eligibleStudent.studentNumber}"/>
+
+        <h:outputText value="Name" />
+        <h:outputText id="firstName" value="#{hostelAppSupportBean.eligibleStudent.firstName}"/>
+
+        <h:outputText value="Department" />
+        <h:outputText id="lastName" value="#{hostelAppSupportBean.eligibleStudent.department}"/>
+
+        <h:outputText value="Student Type" />
+        <h:outputText id="studentType" value="#{hostelAppSupportBean.eligibleStudent.hostelStudentType.studentType}"/>
+
+        <h:outputText value="Hostel" />
+        <h:outputText value="#{hostelAppSupportBean.hostelAllocation.hostelRoom.hostel.hostelName} #{hostelAppSupportBean.hostelAllocation.hostelRoom.roomNumber} (#{hostelAppSupportBean.hostelAllocation.hostelRoomBedSpace.position})"/> 
+    </p:panelGrid>    
+    </p:panel>
+    <br/>     
+        
+    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+        		
+    <h:form id="hostelApplicationForm">
+    <p:tabView>
+        <p:tab title="Update Student Number">
+            <h:outputText value="New Student Number" /><p:spacer width="10" height="10" />     
+            <h:inputText id="newStudentNumber" required="false" value="#{hostelAppSupportBean.newStudentNumber}"/>
+            <br/><br/>                          
+            <h:commandButton id="updateStudentNumber" value="Update Student Number" action="#{hostelAppSupportBean.updateStudentNumber}"/>       
+            <p:spacer width="10" height="10" />     
+            <h:commandButton value="Close" action="#{hostelAppSupportBean.close}"/>
+            <br/><br/>      
+        </p:tab>
+        <p:tab title="Change Student Type">
+            <h:outputText value="Student Type" />
+            <p:spacer width="10" height="10" />     
+            <h:selectOneMenu id="gender" value="#{hostelAppSupportBean.newStudentType}">
+                <f:selectItem id="eligible" itemLabel="Eligible" itemValue="Eligible"/>
+                <f:selectItem id="sports" itemLabel="Sports" itemValue="Sports"/>
+                <f:selectItem id="specialrequest" itemLabel="Special Request" itemValue="Special Request"/>
+                <f:selectItem id="scholarship" itemLabel="Scholarship" itemValue="Scholarship"/>
+                <f:selectItem id="handicap" itemLabel="Handicap" itemValue="Handicap"/>
+                <f:selectItem id="firstyear" itemLabel="Year One" itemValue="Year One"/>  
+                <f:selectItem id="postgraduate" itemLabel="Post Graduate" itemValue="Post Graduate"/>
+                <f:selectItem id="supplementary" itemLabel="Supplementary" itemValue="Supplementary"/>
+                <f:selectItem id="medicalstudent" itemLabel="Medical Student" itemValue="Medical Student"/>
+                <f:selectItem id="HallHostels" itemLabel="Hall 7 Hostels" itemValue="Hall 7 Hostels"/>
+            </h:selectOneMenu>
+
+            <br/><br/>                        
+            <h:commandButton id="selectCategory" value="Change Student Type" action="#{hostelAppSupportBean.updateStudentType}" />
+            <p:spacer width="10" height="10" />     
+            <h:commandButton value="Close" action="#{hostelAppSupportBean.close}"/>
+            <br/><br/>
+        </p:tab>
+        <p:tab title="Change Hostel Allocation">
+            <p:panelGrid columns="2" columnClasses="label, value">
+            <h:outputText value="Student Number" />
+            <h:inputText id="hostelStudentNumber" readonly="true" required="false" value="#{hostelAppSupportBean.hostelStudentNumber}"/>
+            
+            <h:outputText value="Hostel" />            
+            <h:selectOneMenu id="hostel" required="false" value="#{hostelAppSupportBean.hostelId}">
+                <f:ajax event="change" listener="#{hostelAppSupportBean.updateRoomList}" render="room" />
+                <f:selectItem itemLabel="Select Hostel" itemValue="0" />
+                <f:selectItems value="#{hostelApplicationHelper.hostels}" var="hostelItem"
+                    itemLabel="#{hostelItem.hostelName}" itemValue="#{hostelItem.id}"  />                        
+            </h:selectOneMenu>
+
+            <h:outputText value="Hostel Room" />                  
+            <h:selectOneMenu id="room" required="false" value="#{hostelAppSupportBean.hostelRoomId}">                
+                <f:selectItem itemLabel="Select Room" itemValue="0" />
+                <f:selectItems value="#{hostelAppSupportBean.hostelRooms}" var="roomItem"
+                    itemLabel="#{roomItem.roomNumber}" itemValue="#{roomItem.id}"  />                        
+            </h:selectOneMenu>
+
+            <h:outputText value="Bed Space" />     
+            <h:selectOneMenu id="bedspace" required="false" value="#{hostelAppSupportBean.roomBedSpaceId}">                
+                <f:selectItem itemLabel="Select Bed Space" itemValue="0" />
+                <f:selectItems value="#{hostelApplicationHelper.hostelRoomBedSpaces}" var="bedSpaceItem"
+                               itemLabel="#{bedSpaceItem.position}" itemValue="#{bedSpaceItem.id}"  />                        
+            </h:selectOneMenu>           
+            </p:panelGrid> 
+            <br/>
+            <h:commandButton id="hostelAllocation" value="Change Hostel Allocation" action="#{hostelAppSupportBean.changeHostelAllocation}"/>
+            <p:spacer width="10" height="10" />     
+            <h:commandButton id="close" value="Close" action="#{hostelAppSupportBean.close}"/>
+            <br/><br/>
+        </p:tab>
+        <p:tab title="Delete Student Records">
+            <p:panelGrid columns="2" columnClasses="label, value">
+                <h:outputText value="Student Number" />
+                <h:outputText value="#{hostelAppSupportBean.hostelStudentNumber}"/>
+
+                <h:outputText value="Name" />
+                <h:outputText id="firstName" value="#{hostelAppSupportBean.eligibleStudent.firstName}"/>
+
+                <h:outputText value="Department" />
+                <h:outputText id="lastName" value="#{hostelAppSupportBean.eligibleStudent.department}"/>
+            </p:panelGrid> 
+            <br/>
+            
+            <p:commandButton value="Delete Student Record" actionListener="#{hostelAppSupportBean.deleteStudent}">
+                <p:confirm header="Confirmation" message="Are you sure you want to delete this student records? Hostel application and room allocation records will be permanently deleted!" icon="ui-icon-alert"/>
+            </p:commandButton>
+            <p:spacer width="10" height="10" />     
+            <p:commandButton value="Close" action="#{hostelAppSupportBean.close}"/>
+            <br/><br/>
+        </p:tab>
+    </p:tabView> 
+        
+    <p:confirmDialog global="true">
+        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/>
+        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close"/>
+    </p:confirmDialog>
+       
+    </h:form>
+    
+    </ui:define>
+
+</ui:composition>

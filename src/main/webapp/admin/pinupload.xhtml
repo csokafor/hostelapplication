@@ -1,0 +1,27 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="admintemplate.xhtml">
+
+<ui:define name="content">
+    <br/>
+    <p:panel>
+        <f:facet name="header">Upload Pin numbers (Use standard excel file template)</f:facet>
+        <br/>
+        <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+        <br/>
+        <h:form enctype="multipart/form-data">
+            <p:growl id="Uploadmessages" showDetail="true" />
+            <p:fileUpload value="#{pinAdminBean.uploadedFile}" mode="simple" />
+            <p:commandButton value="Submit" ajax="false" actionListener="#{pinAdminBean.uploadFile}" />
+        </h:form>    
+               
+        <br/>
+      
+    </p:panel>              
+    <br/>
+    <br/>
+    </ui:define>
+</ui:composition>

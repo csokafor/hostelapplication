@@ -1,0 +1,74 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<p:document xmlns:ui="http://java.sun.com/jsf/facelets"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:p="http://jboss.com/products/seam/pdf" 
+        xmlns:s="http://jboss.com/products/seam/taglib"
+        pageSize="A4"
+        disposition="attachment"
+        fileName="#{hostelAdminSearchAction.hostel.hostelName}">
+
+	<f:facet name="header">
+	    <p:font size="12">
+	    <s:div id="headerdiv">
+	        <p:header borderWidthTop="0" borderWidthBottom="0" alignment="center">
+	        <p:paragraph>
+	        <p:html>
+	            <table cellpadding="0" cellspacing="0" border="0" width="100%">
+	                <tr>	                    
+	                    <td align="center">University of Calabar</td>
+	                </tr>
+                        <tr>	                    
+	                    <td align="center">#{hostelAdminSearchAction.hostel.hostelName} Student List</td>
+	                </tr>
+	            </table>
+	        </p:html>
+	        </p:paragraph>
+	        </p:header>
+	     </s:div>   	        	        
+	    </p:font>
+	</f:facet>
+        
+    <p:paragraph>
+        <p:html>
+            <table>
+                <tr>
+                    <td align="center"><b>CONFIDENTIAL</b></td>    				
+                </tr>
+                <tr>
+                    <td align="left">Hostel: #{hostelAdminSearchAction.hostel.hostelName}</td>    				
+                </tr>
+                <tr>
+                    <td align="left">Description: #{hostelAdminSearchAction.hostel.description}</td>    				
+                </tr>
+                <tr>
+                    <td align="left">Gender: #{hostelAdminSearchAction.hostel.gender}</td>    				
+                </tr>
+                <tr>
+                    <td align="left">No of Rooms: #{hostelAdminSearchAction.hostel.numberOfRooms}</td>
+                </tr>
+            </table>
+        </p:html>
+    </p:paragraph>
+    
+        
+    <p:font name="times-roman" size="10">
+    <p:paragraph spacingAfter="10">
+	    <p:table columns="3" headerRows="1" widths="1 1 3" widthPercentage="100">
+	    	<p:cell>Room No</p:cell>
+                <p:cell>No of Occupants</p:cell>
+	    	<p:cell>Students</p:cell>	    		    	
+	    	<ui:repeat value="#{allHostelRooms}" var="hostelRoom">
+		    	<p:cell verticalAlignment="top">#{hostelRoom.roomNumber}</p:cell>
+                        <p:cell verticalAlignment="top">#{hostelRoom.hostelAllocations.size}</p:cell>
+		    	<p:cell verticalAlignment="top">#{hostelAdminSearchAction.getHostelOccupants(hostelRoom)}</p:cell>		    	
+	    	</ui:repeat>
+	   	</p:table>    	
+    </p:paragraph>   
+   
+    </p:font>
+        
+              
+</p:document>

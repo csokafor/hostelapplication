@@ -1,0 +1,89 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	template="templates/template.xhtml">
+
+    <ui:define name="content">
+        <p:panel>
+            <f:facet name="header">Hostel Application Confirmation</f:facet>
+            <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+            
+            <p:panelGrid columns="2" columnClasses="label, value">
+            <h:outputText rendered="#{applicationBean.hostelApplicatonSaved}" value="Application Number" />
+            <h:outputText rendered="#{applicationBean.hostelApplicatonSaved}" id="requestNumber" value="#{applicationBean.hostelApplication.applicationNumber}"/>
+            
+            <h:outputText value="Student Number" />
+            <h:outputText id="studentNumber" value="#{applicationBean.hostelApplication.studentNumber}"/>
+
+            <h:outputText value="First Name" />
+            <h:outputText id="firstName" value="#{applicationBean.hostelApplication.firstName}"/>
+
+            <h:outputText value="Surname" />
+            <h:outputText id="lastName" value="#{applicationBean.hostelApplication.lastName}"/>
+
+            <h:outputText value="Other Names" />
+            <h:outputText  id="otherNames"  value="#{applicationBean.hostelApplication.otherNames}"/>
+           
+            <h:outputText value="Gender" />
+            <h:outputText  id="gender"  value="#{applicationBean.hostelApplication.gender}"/>
+                                                
+            <h:outputText value="Phone Number" />
+            <h:outputText  id="phoneNumberField"  value="#{applicationBean.hostelApplication.phoneNumber}"/>
+                       
+            <h:outputText value="Email" />
+            <h:outputText  id="emailField"  value="#{applicationBean.hostelApplication.email}"/>
+                                                   
+            <h:outputText value="Faculty" />
+            <h:outputText  id="facultyField"  value="#{applicationBean.hostelApplication.faculty.name}"/>
+                                              
+            <h:outputText value="Department" />
+            <h:outputText  id="departmentField"  value="#{applicationBean.hostelApplication.department.name}"/>
+                     
+            <h:outputText value="Course of Study" />
+            <h:outputText  id="programmeOfStudyField"  value="#{applicationBean.hostelApplication.programmeOfStudy.name}"/>
+               
+            <h:outputText value="Year of Study" />
+            <h:outputText  id="yearOfAdmissionField"  value="#{applicationBean.hostelApplication.yearOfStudy}"/>
+           
+            <h:outputText value="Application Status" />
+            <h:outputText  id="requestStatusField"  value="#{applicationBean.applicationStatus}"/>
+           
+            <h:outputText value="Ballot" />
+            <h:outputText  id="ballotStatusField"  value="#{applicationBean.ballotStatus}"/>
+                                    
+            <h:outputText rendered="#{applicationBean.hostelApplicatonSaved}" id="totalAmountField" />                                      
+            <h:outputText rendered="#{applicationBean.hostelApplicatonSaved}" id="TotalAmount" value="#{hostelSettingsHelper.getAccommodationFee()}">        
+                <f:convertNumber type="currency" currencySymbol="=N="/>
+            </h:outputText>
+                        
+            <h:outputText value="Payment Status" rendered="#{applicationBean.hostelApplicatonSaved}" />
+            <h:outputText  id="paymentStatusField"  rendered="#{applicationBean.hostelApplicatonSaved}" value="#{applicationBean.paymentStatus}"/>
+                 
+            </p:panelGrid>
+            <br/>
+             <h:form id="hostelApplicationForm">        
+                <h:commandButton id="save" value="Save Application"
+                    action="#{applicationBean.saveHostelApplication}" rendered="#{!applicationBean.hostelApplicatonSaved}"/>
+                <p:spacer width="10" height="10" />
+                <h:commandButton id="edit" value="Edit Application"
+                    action="#{applicationBean.editHostelApplication}" rendered="#{!applicationBean.hostelApplicatonSaved}"/>
+                <p:spacer width="10" height="10" />
+                <h:commandButton id="cancel" value="Cancel Application"
+                    action="#{applicationBean.cancel}" rendered="#{!applicationBean.hostelApplicatonSaved}"/>           
+                <p:spacer width="10" height="10" />
+                <h:commandButton id="pay" value="Pay for Accommodation"
+                    action="#{hostelPaymentBean.confirmApplicationPayment(applicationBean.hostelApplication)}" rendered="#{applicationBean.hostelApplication.ballotStatus == 1}"/>
+                <p:spacer width="10" height="10" />
+                <h:commandButton id="close"  value="Close"
+                    action="#{applicationBean.close}" rendered="#{applicationBean.hostelApplicatonSaved}"/>
+
+            </h:form>        
+        </p:panel>                        
+       
+</ui:define>
+
+</ui:composition>
