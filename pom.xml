@@ -7,9 +7,9 @@
     <artifactId>hostelapplication</artifactId>
     <packaging>war</packaging>
     <name>Hostel Webapp</name>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
 	
-	<description>Hostel Applicaion app using Spring Security and JSF</description>
+	<description>Hostel Applicaion Web App</description>
 	<url>https://github.com/csokafor/hostelapplication</url>
 	<developers>
 		<developer>

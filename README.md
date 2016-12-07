@@ -9,4 +9,4 @@ The project requires MySQL database.
 Edit `hostelapplication\src\main\resources\META-INF\persistence.xml` to update database configuration properties.
 
 ## License
-MIT
+GNU General Public License, Version 3
