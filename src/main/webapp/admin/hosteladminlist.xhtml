@@ -21,7 +21,7 @@
                
             <h:selectOneMenu id="hostel" required="true" value="#{hostelAdminSearchBean.hostelId}">
                 <f:selectItem itemLabel="Select Hostel" itemValue="0" />
-                <f:selectItems id="hostelSelect" value="#{hostelApplicationHelper.hostels}" var="hostelItem" itemLabel="#{hostelItem.hostelName}" 
+                <f:selectItems id="hostelSelect" value="#{hostelApplicationService.hostels}" var="hostelItem" itemLabel="#{hostelItem.hostelName}"
                                itemValue="#{hostelItem.id}"/>                   
             </h:selectOneMenu>
             <br/>

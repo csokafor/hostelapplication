@@ -9,7 +9,6 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.RedirectStrategy;
@@ -18,14 +17,12 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 
 
 public class CustomLogoutHandler extends AbstractAuthenticationTargetUrlRequestHandler  implements LogoutSuccessHandler{
-    private Logger logger = Logger.getLogger(CustomLogoutHandler.class);
-    
+
     @Autowired
     RedirectStrategy redirectStrategy;
     
     @Override
     public void onLogoutSuccess(HttpServletRequest hsr, HttpServletResponse hsr1, Authentication a) throws IOException, ServletException {
-        //logger.info("onLogoutSuccess");
         super.setRedirectStrategy(redirectStrategy);
         super.handle(hsr, hsr1, a);
     }

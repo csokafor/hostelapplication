@@ -6,14 +6,66 @@
 	template="admintemplate.xhtml">
 	
 	<ui:define name="content">
-         <br/>
-         <br/>
-         <br/>
-         <h1>Welcome to Hostel Management System Admin</h1>
-         <br/>                    
-         <strong>Choose from the menus available</strong>
-         <br/>
-         <br/>
-         <br/>
+        <div class="panel panel-default p-20">
+             <br/>
+             <h2>Welcome to Hostel Management System Admin</h2>
+             <br/>
+
+             <strong>Hostel Ballot - Ballot Admin</strong>
+             <ul>
+                <li>Search for ballot application by ballot status, start date and end date</li>
+                <li>Click on 'View' button to see more details of a student's hostel ballot application</li>
+             </ul>
+            <br/>
+
+            <strong>Hostel Ballot - Eligible Ballot Admin</strong>
+            <ul>
+                <li>Upload list of students who are eligible to ballot for accommodation.</li>
+                <li>Search list of uploaded students who are eligible for ballot</li>
+            </ul>
+            <br/>
+
+            <strong>Hostel Application - Application Admin</strong>
+            <ul>
+                <li>Search for hostel application by start date, end date, ballot and payment status. The search parameter can be the student's first name, last name or registration number.</li>
+                <li>Click on 'Print' to print a student's hostel application.</li>
+            </ul>
+            <br/>
+
+            <strong>Hostel Application - Student Admin</strong>
+            <ul>
+                <li>Add single student eligible for hostel application</li>
+                <li>Search for uploaded eligible student by first name, last name or registration number.</li>
+                <li>Click on 'Update' button in the search result to view more details about a student</li>
+                <li>After clicking on Update button, the current page has tabs for updating student registration number, changing student's hostel allocation, changing student type and delete a student's record.</li>
+            </ul>
+            <br/>
+
+            <strong>Hostel Application - Hostel Admin</strong>
+            <ul>
+                <li>View list of hostels in the database</li>
+                <li>View hostels rooms and students who have been allocated each room</li>
+            </ul>
+            <br/>
+
+            <strong>Hostel Application - Eligible Student Admin</strong>
+            <ul>
+                <li>Upload list of students who are eligible to apply for hostel accommodation.</li>
+                <li>Search list of uploaded students who are eligible for hostel accommodation</li>
+            </ul>
+            <br/>
+
+            <strong>Pin Admin - Check Pin Status</strong>
+            <ul>
+                <li>Enter pin serial number to see the current status of the pin</li>
+            </ul>
+            <br/>
+
+            <strong>Pin Admin - Pin Upload</strong>
+            <ul>
+                <li>Upload pin that will be used by students to pay for hostel application in the portal.</li>
+            </ul>
+            <br/>
+        </div>
 	</ui:define>
 </ui:composition>

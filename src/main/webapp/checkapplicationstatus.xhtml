@@ -13,11 +13,11 @@
     <f:facet name="header">Check Hostel Application</f:facet>	
         <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
         <h:form id="hostelApplicationStatusForm">
-            <p:panelGrid columns="2" columnClasses="label, value">
-            <h:outputText value="Student Number"/>
+            <p:panelGrid columns="2">
+            <h:outputLabel for="studentNumber" value="Student Number" />
             <h:inputText id="studentNumber" required="true" value="#{applicationStatusBean.studentNumber}"/>
 
-            <h:outputText value="Application Number"/>
+            <h:outputLabel for="requestNumber" value="Application Number" />
             <h:inputText id="requestNumber" required="true" value="#{applicationStatusBean.applicationNumber}"/>
                                                      
             </p:panelGrid>

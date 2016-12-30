@@ -1,70 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans:beans xmlns="http://www.springframework.org/schema/security"
-             xmlns:beans="http://www.springframework.org/schema/beans"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xmlns:context="http://www.springframework.org/schema/context"
-             xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-                        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
-      
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+          http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd ">
+
     <context:annotation-config />
-    <context:component-scan base-package="com.perblo.security"/>
-    
-    <authentication-manager alias="authenticationManager">
-        <authentication-provider ref="customAuthenticationProvider"/>
-    </authentication-manager>
-    
-    <beans:bean id="customLogoutHandler" class="com.perblo.security.CustomLogoutHandler">
-        <beans:property name="defaultTargetUrl" value="/hostel/signin.xhtml" />
-    </beans:bean>
-    
-    <beans:bean id="failureHandler"
-                class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
-        <beans:property name="redirectStrategy"  ref="customRedirectStrategy"  />
-        <beans:property name="defaultFailureUrl" value="/hostel/signin.xhtml" />
-    </beans:bean>
+    <context:component-scan base-package="com.perblo.security,com.perblo.hostel.entitymanager,com.perblo.hostel.service,com.perblo.payment"/>
+    <context:property-placeholder ignore-unresolvable="false" ignore-resource-not-found="true"
+                                  location="/WEB-INF/datasource.properties,/WEB-INF/mail.properties" />
 
-    <beans:bean id="authenticationProcessingFilter"
-                class="org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter">
-        
-        <beans:property name="filterProcessesUrl" value="/j_spring_security_check" />
-        <beans:property name="authenticationManager" ref="authenticationManager" />
-        <beans:property name="authenticationFailureHandler" ref="failureHandler" />
-        <beans:property name="authenticationSuccessHandler" ref="customAuthenticationSuccessHandler" />
-    </beans:bean>     
+    <bean id="hostelDS" class="com.zaxxer.hikari.HikariDataSource"	destroy-method="close">
+        <property name="dataSourceClassName" value="${jdbc.datasource.class}" />
+        <property name="maximumPoolSize" value="${jdbc.maxPoolSize}" />
+        <property name="maxLifetime" value="${jdbc.maxLifetime}" />
+        <property name="idleTimeout" value="${jdbc.idleTimeout}" />
+        <property name="dataSourceProperties">
+            <props>
+                <prop key="url">${jdbc.url}</prop>
+                <prop key="user">${jdbc.username}</prop>
+                <prop key="password">${jdbc.password}</prop>
+                <prop key="useUnicode">${jdbc.useUnicode}</prop>
+                <prop key="characterEncoding">${jdbc.characterEncoding}</prop>
+                <prop key="prepStmtCacheSize">${jdbc.prepStmtCacheSize}</prop>
+                <prop key="prepStmtCacheSqlLimit">${jdbc.prepStmtCacheSqlLimit}</prop>
+                <prop key="cachePrepStmts">${jdbc.cachePrepStmts}</prop>
+            </props>
+        </property>
+    </bean>
 
-    <beans:bean id="authenticationEntryPoint"
-                class="com.perblo.security.CustomLoginUrlAuthenticationEntryPoint">
-        <beans:constructor-arg value="/hostel/signin.xhtml"/>        
-    </beans:bean>       
-    
-    <beans:bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
-        <beans:constructor-arg>
-            <beans:list>
-                <beans:bean class="org.springframework.security.web.access.expression.WebExpressionVoter"/>
-                <beans:bean class="org.springframework.security.access.vote.RoleVoter"/>                
-                <beans:bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>
-            </beans:list>
-        </beans:constructor-arg>
-    </beans:bean>    
-    
-    <beans:bean id="sessionRegistry"
-                class="org.springframework.security.core.session.SessionRegistryImpl" />
-       
-    <http access-decision-manager-ref="accessDecisionManager" auto-config="false" 
-          entry-point-ref="authenticationEntryPoint" use-expressions="true">                       
-       
-        <intercept-url pattern="/admin/**" access="hasAnyRole('ROLE_HOSTEL APPLICATION ADMIN','ROLE_HOSTEL ADMIN')" /> 
+    <bean id="persistenceProvider" class="org.hibernate.jpa.HibernatePersistenceProvider" />
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+    <bean id="jpaAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="databasePlatform" value="org.hibernate.dialect.MySQL5Dialect" />
+        <property name="showSql" value="false"/>
+    </bean>
 
-        <logout  invalidate-session="true" success-handler-ref="customLogoutHandler"
-              logout-url="/logout" delete-cookies="JSESSIONID" /> 
-       
-        <custom-filter position="FORM_LOGIN_FILTER" ref="authenticationProcessingFilter" />
+    <bean id="hostelDSEntityManagerFactory"	class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          depends-on="hostelDS">
+        <property name="persistenceXmlLocation" value="classpath:META-INF/persistence.xml" />
+        <property name="dataSource" ref="hostelDS" />
+        <property name="persistenceUnitName" value="hostelPU" />
+        <property name="jpaVendorAdapter" ref="jpaAdapter" />
+        <property name="jpaDialect" ref="jpaDialect"/>
+        <property name="persistenceProvider" ref="persistenceProvider" />
+        <property name="packagesToScan"	value="com.perblo.hostel.entity" />
+    </bean>
 
-        <session-management>
-            <concurrency-control session-registry-ref="sessionRegistry" expired-url="/hostel/signin.xhtml" 
-                max-sessions="1" error-if-maximum-exceeded="true" />
-        </session-management>
-        <csrf disabled="true"/>        
-    </http>  
-</beans:beans>
+    <bean id="hostelTxManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="hostelDSEntityManagerFactory"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="hostelTxManager" />
+
+    <bean id="hostelEntityManagerImpl" class="com.perblo.hostel.entitymanager.HostelEntityManagerImpl"
+          depends-on="hostelDSEntityManagerFactory" />
+
+    <!-- Mail session -->
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtps.auth">true</prop>
+            </props>
+        </property>
+        <property name="port" value="${SMTP_HOST_PORT}"></property>
+        <property name="protocol" value="smtps"></property>
+        <property name="host" value="${SMTP_HOST_NAME}"></property>
+        <property name="username" value="${SMTP_AUTH_USER}"></property>
+        <property name="password" value="${SMTP_AUTH_PWD}"></property>
+    </bean>
+
+    <import resource="security.xml" />
+</beans>

@@ -6,11 +6,15 @@
 package com.perblo.security;
 
 import com.perblo.hostel.entity.Role;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static com.perblo.security.LoginManager.LOGIN_USER;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
-import org.apache.log4j.Logger;
+import java.io.Serializable;
+
 
 /**
  *
@@ -18,8 +22,8 @@ import org.apache.log4j.Logger;
  */
 @ManagedBean(name="loginUserBean")
 @SessionScoped
-public class LoginUserBean {
-    private static final Logger log = Logger.getLogger(LoginUserBean.class);
+public class LoginUserBean implements Serializable {
+    private static final Logger log = LoggerFactory.getLogger(LoginUserBean.class);
     private LoginUser user;
     private boolean userLoggedIn;
     

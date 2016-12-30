@@ -12,9 +12,10 @@
     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
        
     <p:panel>
-        <f:facet name="header">Upload Student Eligible for Hostel (Use standard excel file template)</f:facet>
+        <f:facet name="header">Upload Students Eligible for Hostel (Use standard excel file template)</f:facet>
         <br/>
         <h:form enctype="multipart/form-data">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <p:growl id="Uploadmessages" showDetail="true" />
             <p:fileUpload value="#{eligibleStudentUploadBean.uploadedFile}" mode="simple" />
             <p:commandButton value="Submit" ajax="false" actionListener="#{eligibleStudentUploadBean.uploadFile}" />
@@ -52,8 +53,9 @@
         </p:panel>
         <br/><br/>
         <p:panel>
-            <f:facet name="header">Student Search</f:facet>
-            <h:form id="search"> 
+            <f:facet name="header">Students Eligible for Hostel Search</f:facet>
+            <h:form id="search">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <br/><br/>        
                 <h:outputText value="Search By" /><p:spacer width="10" height="10" />
                 <h:inputText id="searchParam" required="true" value="#{eligibleStudentUploadBean.searchParam}"/>
@@ -64,7 +66,7 @@
         </p:panel>        
         
         <p:panel>
-            <f:facet name="header">Search Result</f:facet>            
+            <f:facet name="header">Students Eligible for Hostel Search Result</f:facet>
                 
             <h:outputText id="NoStudentFoundMessage" value="No Student Found" 
                 rendered="#{eligibleStudentUploadBean.eligibleStudents != null and eligibleStudentUploadBean.eligibleStudents.size() == 0}"/>

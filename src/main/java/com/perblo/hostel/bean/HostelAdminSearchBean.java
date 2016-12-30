@@ -10,20 +10,19 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import com.perblo.hostel.entity.Student;
-import com.perblo.hostel.helper.HostelApplicationHelper;
-import com.perblo.hostel.helper.HostelApplicationStatus;
-import com.perblo.hostel.helper.HostelSettingsHelper;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
-import static com.perblo.security.LoginManager.LOGIN_USER;
-import com.perblo.security.LoginUser;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import com.perblo.hostel.service.HostelApplicationService;
+import com.perblo.hostel.service.HostelApplicationStatus;
+import com.perblo.hostel.service.HostelConfig;
+import com.perblo.hostel.service.HostelSettingsService;
+
 import java.util.ArrayList;
 import java.util.Set;
 import javax.annotation.PreDestroy;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
-import javax.faces.context.FacesContext;
+
 import org.apache.log4j.Logger;
 
 @ManagedBean(name="hostelAdminSearchBean")
@@ -31,13 +30,20 @@ import org.apache.log4j.Logger;
 //@Restrict("#{s:hasRole('Hostel Admin')}")
 public class HostelAdminSearchBean implements Serializable {
     private static final Logger log = Logger.getLogger(HostelAdminSearchBean.class);
+
+    @ManagedProperty(value = "#{hostelEntityManager}")
+    HostelEntityManagerImpl hostelEntityManager;
+
     private EntityManager entityManager;    
     
-    @ManagedProperty(value="#{hostelApplicationHelper}")
-    private HostelApplicationHelper hostelApplicationHelper;
+    @ManagedProperty(value="#{hostelApplicationService}")
+    private HostelApplicationService hostelApplicationService;
          
-    @ManagedProperty(value="#{hostelSettingsHelper}")
-    private HostelSettingsHelper hostelSettingsHelper;
+    @ManagedProperty(value="#{hostelSettingsService}")
+    private HostelSettingsService hostelSettingsService;
+
+    @ManagedProperty(value="#{hostelConfig}")
+    private HostelConfig hostelConfig;
         
     private int pageSize = 20;
     private int page;
@@ -50,7 +56,7 @@ public class HostelAdminSearchBean implements Serializable {
     private List<HostelRoom> allHostelRooms;
             
     public HostelAdminSearchBean() {
-        this.entityManager = HostelEntityManagerListener.createEntityManager();
+        this.entityManager = hostelEntityManager.getEntityManager();
         hostelRooms = new ArrayList<HostelRoom>();
         allHostelRooms = new ArrayList<HostelRoom>();
     }
@@ -91,8 +97,8 @@ public class HostelAdminSearchBean implements Serializable {
         Set<HostelAllocation> hostelAllocations = hostelRoom.getHostelAllocations();        
         for(HostelAllocation hostelAllocation : hostelAllocations) {
                         
-            hostelApplication = hostelApplicationHelper.getHostelApplicationByAcademicSessionAndStudentNumber(
-                    hostelSettingsHelper.getCurrentAcademicSession().getId(), hostelAllocation.getStudentNumber());
+            hostelApplication = hostelApplicationService.getHostelApplicationByAcademicSessionAndStudentNumber(
+                    hostelSettingsService.getCurrentAcademicSession().getId(), hostelAllocation.getStudentNumber());
 
             if(hostelApplication !=  null && hostelApplication.getPaymentStatus() == HostelApplicationStatus.PAID) {
                 
@@ -139,20 +145,20 @@ public class HostelAdminSearchBean implements Serializable {
         }
     }
 
-    public HostelApplicationHelper getHostelApplicationHelper() {
-        return hostelApplicationHelper;
+    public HostelApplicationService getHostelApplicationService() {
+        return hostelApplicationService;
     }
 
-    public void setHostelApplicationHelper(HostelApplicationHelper hostelApplicationHelper) {
-        this.hostelApplicationHelper = hostelApplicationHelper;
+    public void setHostelApplicationService(HostelApplicationService hostelApplicationService) {
+        this.hostelApplicationService = hostelApplicationService;
     }
 
-    public HostelSettingsHelper getHostelSettingsHelper() {
-        return hostelSettingsHelper;
+    public HostelSettingsService getHostelSettingsService() {
+        return hostelSettingsService;
     }
 
-    public void setHostelSettingsHelper(HostelSettingsHelper hostelSettingsHelper) {
-        this.hostelSettingsHelper = hostelSettingsHelper;
+    public void setHostelSettingsService(HostelSettingsService hostelSettingsService) {
+        this.hostelSettingsService = hostelSettingsService;
     }
 
     public int getHostelId() {

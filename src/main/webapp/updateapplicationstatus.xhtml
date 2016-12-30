@@ -26,64 +26,64 @@
                 <p:commandButton value="Submit" ajax="false" actionListener="#{applicationStatusBean.upload}" />
             </h:form>   
             <br/>
-            <p:panelGrid columns="2" columnClasses="label, value">                                      
-            <h:outputText value="Application Number" />
-            <h:outputText value="#{applicationStatusBean.hostelApplication.applicationNumber} " />
+            <p:panelGrid columns="2">
+            <h:outputLabel for="applicationNumber" value="Application Number" />
+            <h:outputText id="applicationNumber" value="#{applicationStatusBean.hostelApplication.applicationNumber} " />
             
-            <h:outputText value="Application Date" />
-            <h:outputText value="#{applicationStatusBean.applicationDate} " />
+            <h:outputLabel for="applicationDate" value="Application Date" />
+            <h:outputText id="applicationDate" value="#{applicationStatusBean.applicationDate} " />
                                                          
-            <h:outputText value="Student Number" />
-            <h:outputText value="#{applicationStatusBean.hostelApplication.studentNumber} " />
+            <h:outputLabel for="studentNumber" value="Student Number" />
+            <h:outputText id="studentNumber" value="#{applicationStatusBean.hostelApplication.studentNumber} " />
                             
-            <h:outputText value="First Name" />
-            <h:outputText value="#{applicationStatusBean.hostelApplication.firstName}   " />
+            <h:outputLabel for="firstName" value="First Name" />
+            <h:outputText id="firstName" value="#{applicationStatusBean.hostelApplication.firstName}   " />
                
-            <h:outputText value="Surname" />
-            <h:outputText value="#{applicationStatusBean.hostelApplication.lastName}" />
+            <h:outputLabel for="surname" value="Surname" />
+            <h:outputText id="surname" value="#{applicationStatusBean.hostelApplication.lastName}" />
                         
-            <h:outputText value="Other Names" />
+            <h:outputLabel for="otherNames" value="Other Names" />
             <h:outputText  id="otherNames"  value="#{applicationStatusBean.hostelApplication.otherNames}"/>             
             
-            <h:outputText value="Gender" />
+            <h:outputLabel for="gender" value="Gender" />
             <h:outputText  id="gender"  value="#{applicationStatusBean.hostelApplication.gender}"/>
                                                 
-            <h:outputText value="Phone Number" />
+            <h:outputLabel for="phoneNumberField" value="Phone Number" />
             <h:outputText  id="phoneNumberField"  value="#{applicationStatusBean.hostelApplication.phoneNumber}"/>
                        
-            <h:outputText value="Email" />
+            <h:outputLabel for="emailField" value="Email" />
             <h:outputText  id="emailField"  value="#{applicationStatusBean.hostelApplication.email}"/>
             
-            <h:outputText value="Faculty" />
+            <h:outputLabel for="facultyField" value="Faculty" />
             <h:outputText  id="facultyField"  value="#{applicationStatusBean.hostelApplication.faculty.name}"/>
                                               
-            <h:outputText value="Department" />
+            <h:outputLabel for="departmentField" value="Department" />
             <h:outputText  id="departmentField"  value="#{applicationStatusBean.hostelApplication.department.name}"/>
                      
-            <h:outputText value="Course of Study" />
+            <h:outputLabel for="programmeOfStudyField" value="Course of Study" />
             <h:outputText  id="programmeOfStudyField"  value="#{applicationStatusBean.hostelApplication.programmeOfStudy.name}"/>
                
-            <h:outputText value="Year of Study" />
+            <h:outputLabel for="yearOfAdmissionField" value="Year of Study" />
             <h:outputText  id="yearOfAdmissionField"  value="#{applicationStatusBean.hostelApplication.yearOfStudy}"/>
             
-            <h:outputText value="Type" />
-            <h:outputText  value="#{applicationStatusBean.hostelApplication.studentType.studentType}"/>
+            <h:outputLabel for="studentType" value="Type" />
+            <h:outputText id="studentType"  value="#{applicationStatusBean.hostelApplication.studentType.studentType}"/>
                
-            <h:outputText value="Ballot" />
-            <h:outputText  value="#{applicationStatusBean.ballotStatus}"/>
+            <h:outputLabel for="ballotStatus" value="Ballot" />
+            <h:outputText id="ballotStatus"  value="#{applicationStatusBean.ballotStatus}"/>
             
-            <h:outputText value="Allocated Room" rendered="#{applicationStatusBean.hasPaid}"/>
-            <h:outputText rendered="#{applicationStatusBean.hasPaid}" value="#{applicationStatusBean.hostelApplication.hostelAllocation.hostelRoom.hostel.hostelName}, 
+            <h:outputLabel for="allocatedRoom" value="Allocated Room" rendered="#{applicationStatusBean.hasPaid}"/>
+            <h:outputText id="allocatedRoom" rendered="#{applicationStatusBean.hasPaid}" value="#{applicationStatusBean.hostelApplication.hostelAllocation.hostelRoom.hostel.hostelName},
                            Room #{applicationStatusBean.hostelApplication.hostelAllocation.hostelRoom.roomNumber} 
                            (#{applicationStatusBean.hostelApplication.hostelAllocation.hostelRoomBedSpace.position})"/>
                               
-            <h:outputText value="Total Amount" />
+            <h:outputLabel for="TotalAmount" value="Total Amount" />
             <h:outputText id="TotalAmount" value="#{applicationStatusBean.hostelApplication.totalAmount}">        
                     <f:convertNumber type="currency" currencySymbol="=N="/>
             </h:outputText>  
             
-            <h:outputText value="Payment Status" />
-            <h:outputText  value="#{applicationStatusBean.paymentStatus}"/>                                  
+            <h:outputText for="paymentStatus" value="Payment Status" />
+            <h:outputText id="paymentStatus" value="#{applicationStatusBean.paymentStatus}"/>
             </p:panelGrid>
             <br/>
             <h:form id="hostelApplicationForm">

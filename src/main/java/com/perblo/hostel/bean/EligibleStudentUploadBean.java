@@ -10,19 +10,18 @@ import com.perblo.hostel.entity.HostelAllocation;
 import com.perblo.hostel.entity.HostelRoom;
 import com.perblo.hostel.entity.HostelRoomBedSpace;
 import com.perblo.hostel.entity.HostelStudentType;
-import com.perblo.hostel.helper.HostelSettingsHelper;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
-import static com.perblo.security.LoginManager.LOGIN_USER;
-import com.perblo.security.LoginUser;
+import com.perblo.hostel.entitymanager.HostelEntityManager;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import com.perblo.hostel.service.HostelApplicationService;
+import com.perblo.hostel.service.HostelConfig;
+import com.perblo.hostel.service.HostelSettingsService;
+
 import com.perblo.security.LoginUserBean;
-import java.io.File;
-import java.io.FileInputStream;
+
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.PreDestroy;
@@ -34,6 +33,7 @@ import javax.faces.context.FacesContext;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.hssf.usermodel.*;
@@ -52,13 +52,18 @@ import org.springframework.security.access.annotation.Secured;
 @Secured("Hostel Admin")
 public class EligibleStudentUploadBean implements Serializable {
     private static final Logger log = Logger.getLogger(EligibleStudentUploadBean.class);
-    private EntityManager entityManager;     
-    
-    @ManagedProperty(value="#{hostelSettingsHelper}")
-    private HostelSettingsHelper hostelSettingsHelper;   
-    
+
+    @ManagedProperty(value = "#{hostelEntityManager}")
+    HostelEntityManager hostelEntityManager;
+
+    @ManagedProperty(value="#{hostelSettingsService}")
+    private HostelSettingsService hostelSettingsService;
+
     @ManagedProperty(value="#{loginUserBean}")
     LoginUserBean loginUserBean;
+
+    @ManagedProperty(value="#{hostelApplicationService}")
+    private HostelApplicationService hostelApplicationService;
     
     private byte[] data;     
     private String fileExtension;    
@@ -76,7 +81,6 @@ public class EligibleStudentUploadBean implements Serializable {
     private List<EligibleStudent> uploadedEligibleStudents;
     
     public EligibleStudentUploadBean() {
-        this.entityManager = HostelEntityManagerListener.createEntityManager();   
         uploadedEligibleStudents = new ArrayList<EligibleStudent>();
         eligibleStudents  = new ArrayList<EligibleStudent>();
     }
@@ -113,8 +117,7 @@ public class EligibleStudentUploadBean implements Serializable {
         int numberOfRecords = 0;
 
         try {            
-                EntityTransaction transaction = entityManager.getTransaction();
-                transaction.begin();
+
                 //check for xlsx files
                 if (uploadedFile.getFileName().contains("xlsx")) {
                     XSSFWorkbook workBook = new XSSFWorkbook(uploadedFile.getInputstream());
@@ -139,15 +142,7 @@ public class EligibleStudentUploadBean implements Serializable {
                             Cell departmentCell = cellsIter.next();
                             departmentCell.setCellType(Cell.CELL_TYPE_STRING);
                             department = departmentCell.getStringCellValue();
-                            /*
-                            Cell programmeCell = cellsIter.next();
-                            programmeCell.setCellType(Cell.CELL_TYPE_STRING);
-                            programme = programmeCell.getStringCellValue();
-                            
-                            Cell yearOfStudyCell = cellsIter.next();
-                            yearOfStudyCell.setCellType(Cell.CELL_TYPE_STRING);
-                            yearOfStudy = yearOfStudyCell.getStringCellValue();
-                            */
+
                             Cell studentTypeCell = cellsIter.next();
                             studentTypeCell.setCellType(Cell.CELL_TYPE_STRING);
                             studentType = studentTypeCell.getStringCellValue();
@@ -161,14 +156,14 @@ public class EligibleStudentUploadBean implements Serializable {
                             log.info("studentNumber = " + studentNumber + ", studentName = " + studentName + " department = " + department +
                                     ", studentType = " + studentType + ", hostel = " + hostel);
                             
-                            EligibleStudent eliStudent = this.getEligibleStudentByStudentNumber(studentNumber);
+                            EligibleStudent eliStudent = hostelApplicationService.getEligibleStudentByStudentNumber(studentNumber);
                             if(eliStudent == null) {
-                                HostelStudentType hostelStudentType = this.getHostelStudentType(studentType);
+                                HostelStudentType hostelStudentType = hostelApplicationService.getHostelStudentType(studentType);
                                 if(hostelStudentType == null) {
                                     log.error("hostel student type =" + studentType + " not found");
                                 } else {
-                                    EligibleStudent eligibleStudent = this.addEligibleStudent(studentNumber, studentName, department, 
-                                            hostelStudentType, hostel);
+                                    EligibleStudent eligibleStudent = hostelApplicationService.addEligibleStudent(studentNumber, studentName, department,
+                                            hostelStudentType, hostel, loginUserBean.getCurrentUser().getUserName());
                                     uploadedEligibleStudents.add(eligibleStudent);
                                 }    
                             } else {
@@ -202,16 +197,7 @@ public class EligibleStudentUploadBean implements Serializable {
                             Cell departmentCell = cellsIter.next();
                             departmentCell.setCellType(Cell.CELL_TYPE_STRING);
                             department = departmentCell.getStringCellValue();
-                            /*
-                            Cell programmeCell = cellsIter.next();
-                            programmeCell.setCellType(Cell.CELL_TYPE_STRING);
-                            programme = programmeCell.getStringCellValue();
-                            
-                            Cell yearOfStudyCell = cellsIter.next();
-                            yearOfStudyCell.setCellType(Cell.CELL_TYPE_STRING);
-                            yearOfStudy = yearOfStudyCell.getStringCellValue();
-                            */
-                            
+
                             Cell studentTypeCell = cellsIter.next();
                             studentTypeCell.setCellType(Cell.CELL_TYPE_STRING);
                             studentType = studentTypeCell.getStringCellValue();
@@ -225,14 +211,14 @@ public class EligibleStudentUploadBean implements Serializable {
                             log.info("studentNumber = " + studentNumber + ", studentName = " + studentName + " department = " + department +
                                     ", studentType = " + studentType + ", hostel = " + hostel);
                             
-                            EligibleStudent eliStudent = this.getEligibleStudentByStudentNumber(studentNumber);
+                            EligibleStudent eliStudent = hostelApplicationService.getEligibleStudentByStudentNumber(studentNumber);
                             if(eliStudent == null) {
-                                HostelStudentType hostelStudentType = this.getHostelStudentType(studentType);
+                                HostelStudentType hostelStudentType = hostelApplicationService.getHostelStudentType(studentType);
                                 if(hostelStudentType == null) {
                                     log.error("hostel student type =" + studentType + " not found");
                                 } else {
-                                    EligibleStudent eligibleStudent = this.addEligibleStudent(studentNumber, studentName, department, 
-                                           hostelStudentType, hostel);
+                                    EligibleStudent eligibleStudent = hostelApplicationService.addEligibleStudent(studentNumber, studentName, department,
+                                           hostelStudentType, hostel, loginUserBean.getCurrentUser().getUserName());
                                     uploadedEligibleStudents.add(eligibleStudent);
                                 }
                             } else {
@@ -241,8 +227,6 @@ public class EligibleStudentUploadBean implements Serializable {
                         }
                     }
                 }
-                
-                transaction.commit();                              
 
         } catch (FileNotFoundException e) {
             log.error(e.getMessage(), e);
@@ -259,147 +243,7 @@ public class EligibleStudentUploadBean implements Serializable {
         }
         
     }
-    
-    private EligibleStudent addEligibleStudent(String studentNumber, String studentName, String department, 
-            HostelStudentType hostelStudentType, String hostel) {
-        EligibleStudent eligibleStudent = new EligibleStudent();
-        try {
-            eligibleStudent.setStudentNumber(studentNumber);
-            eligibleStudent.setFirstName(studentName);
-            eligibleStudent.setDepartment(department);
-            //eligibleStudent.setProgrammeOfStudy(programme);
-            eligibleStudent.setHostelStudentType(hostelStudentType);
-            /*
-            try {
-                if(yearOfStudy.trim().equalsIgnoreCase("Final Year")) {
-                    eligibleStudent.setYearOfStudy(400);
-                } else {
-                    eligibleStudent.setYearOfStudy(Integer.valueOf(yearOfStudy));
-                }
-            } catch(Exception ye) {
-                log.error("invalid year of study");
-            }
-            */
-            
-            eligibleStudent.setAcademicSession(hostelSettingsHelper.getCurrentAcademicSession().getSessionName());
-            eligibleStudent.setDateUploaded(Calendar.getInstance().getTime());
-            eligibleStudent.setUploadedBy(loginUserBean.getCurrentUser().getUserName());
-            
-            entityManager.persist(eligibleStudent);
-            log.info("Eligible student created for " + studentNumber);
-            
-            String[] hostelArray = hostel.split(" ");
-            String hostelName = hostelArray[0] + " " +  hostelArray[1];
-            String roomNumber = hostelArray[3];
-            String space = hostelArray[4] + " " +  hostelArray[5];
-            log.info("hostel = " + hostel + " , room number = " + roomNumber + " , space = " + space);
-            Hostel hall = getHostelByName(hostelName);
-            HostelRoomBedSpace bedSpace = this.getHostelRoomBedSpaceByPosition(space);
-            HostelRoom hostelRoom = this.getHostelRoomByHostelAndRoomNumber(hall, roomNumber);
-            if(hostelRoom == null) {
-                hostelRoom = new HostelRoom();
-                hostelRoom.setHostel(hall);
-                hostelRoom.setRoomNumber(roomNumber);
-                hostelRoom.setNumberOfOccupants(4);
-                entityManager.persist(hostelRoom);
-            }
-            
-            HostelAllocation hostelAllocation = new HostelAllocation();
-            hostelAllocation.setStudentNumber(studentNumber);
-            hostelAllocation.setHostelRoomBedSpace(bedSpace);
-            hostelAllocation.setHostelRoom(hostelRoom);
-            hostelAllocation.setAcademicSession(hostelSettingsHelper.getCurrentAcademicSession());
-            entityManager.persist(hostelAllocation);
-            log.info("Hostel allocation created for " + studentNumber);
-            
-        } catch(Exception e) {
-            log.error("Error addEligibleStudent: " + e.getMessage());
-        }
-        
-        return eligibleStudent;
-    }
-    
-    private HostelStudentType getHostelStudentType(String studentType) {
-        HostelStudentType hostelStudentType = null;
-        try {
-            Query query = entityManager.createNamedQuery("getHostelStudentTypeByStudentType");
-            query.setParameter(1, studentType);
-            
-            hostelStudentType = (HostelStudentType)query.getSingleResult();
-            
-            
-        } catch(Exception e) {
-            log.error("Error in getHostelStudentType: " + e.getLocalizedMessage());
-        }
-        
-        return hostelStudentType;
-    }
-    
-    private EligibleStudent getEligibleStudentByStudentNumber(String studentNumber) {
-        EligibleStudent eligibleStudent = null;
-        try {
-            Query query = entityManager.createNamedQuery("getEligibleStudentByStudentNumber");
-            query.setParameter(1, studentNumber);
-            
-            eligibleStudent = (EligibleStudent)query.getSingleResult();
-            
-            
-        } catch(Exception e) {
-            log.error("Error in getEligibleStudentByStudentNumber: " + e.getLocalizedMessage());
-        }
-        
-        return eligibleStudent;
-    }
-    
-    private HostelRoomBedSpace getHostelRoomBedSpaceByPosition(String space) {
-        HostelRoomBedSpace hostelRoomBedSpace = null;
-        try {
-            Query query = entityManager.createNamedQuery("getHostelRoomBedSpaceByPosition");
-            query.setParameter(1, space);
-            
-            hostelRoomBedSpace = (HostelRoomBedSpace)query.getSingleResult();
-            
-            
-        } catch(Exception e) {
-            log.error("Error in getHostelRoomBedSpaceByPosition: " + e.getLocalizedMessage());
-        }
-        
-        return hostelRoomBedSpace;
-    }
-    
-    private Hostel getHostelByName(String hostelName) {
-        Hostel hostel = null;
-        try {
-            Query query = entityManager.createNamedQuery("getHostelByName");
-            query.setParameter(1, hostelName);
-            
-            hostel = (Hostel)query.getSingleResult();
-            
-            
-        } catch(Exception e) {
-            log.error("Error in getHostelByName: " + e.getLocalizedMessage());
-        }
-        
-        return hostel;
-    }
-    
-    private HostelRoom getHostelRoomByHostelAndRoomNumber(Hostel hostel, String roomNumber) {
-        HostelRoom hostelRoom = null;
-        try {
-            Query query = entityManager.createNamedQuery("getHostelRoomByHostelAndRoomNumber");
-            query.setParameter(1, hostel.getId());
-            query.setParameter(2, roomNumber);
-            
-            hostelRoom = (HostelRoom)query.getSingleResult();
-            
-            
-        } catch(Exception e) {
-            log.error("Error in getHostelRoomByHostelAndRoomNumber: " + e.getLocalizedMessage());
-        }
-        
-        return hostelRoom;
-    }
-    
+
     public void search() {
        uploadedEligibleStudents = new ArrayList<EligibleStudent>();
        page = 0;
@@ -424,7 +268,7 @@ public class EligibleStudentUploadBean implements Serializable {
         if (!queryString.equalsIgnoreCase("%%")) {
             queryString = "select t from EligibleStudent t where lower(t.firstName) like '%" + searchParam +
                     "%' or lower(t.department) like '" + searchParam + "' or lower(t.studentNumber) like '" + searchParam + "'";
-            query = entityManager.createQuery(queryString);
+            query = hostelEntityManager.getEntityManager().createQuery(queryString);
             
         } else {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -503,12 +347,20 @@ public class EligibleStudentUploadBean implements Serializable {
         this.loginUserBean = loginUserBean;
     }
 
-    public HostelSettingsHelper getHostelSettingsHelper() {
-        return hostelSettingsHelper;
+    public HostelSettingsService getHostelSettingsService() {
+        return hostelSettingsService;
     }
 
-    public void setHostelSettingsHelper(HostelSettingsHelper hostelSettingsHelper) {
-        this.hostelSettingsHelper = hostelSettingsHelper;
+    public void setHostelSettingsService(HostelSettingsService hostelSettingsService) {
+        this.hostelSettingsService = hostelSettingsService;
+    }
+
+    public HostelEntityManager getHostelEntityManager() {
+        return hostelEntityManager;
+    }
+
+    public void setHostelEntityManager(HostelEntityManager hostelEntityManager) {
+        this.hostelEntityManager = hostelEntityManager;
     }
 
     public List<EligibleStudent> getEligibleStudents() {
@@ -543,12 +395,5 @@ public class EligibleStudentUploadBean implements Serializable {
     public void setUploadRowIndex(int uploadRowIndex) {
         this.uploadRowIndex = uploadRowIndex;
     }
-       
-    
-    @PreDestroy
-    public void destroyBean() {
-        if(entityManager.isOpen())
-            entityManager.close();
-        entityManager = null;        
-    }
+
 }

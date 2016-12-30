@@ -13,7 +13,7 @@
 		<h:outputStylesheet name="print-style.css" library="css" />        		          
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-                <title>#{hostelSettingsHelper.getSchoolName()} Hostel Management System </title>
+                <title>#{hostelSettingsService.getSchoolName()} Hostel Management System </title>
 	</h:head>
     
     <h:body onload="window.print()">
@@ -101,7 +101,7 @@
         </div>
 	<br/>
         <div id="footer">
-	    &copy; 2015 #{hostelSettingsHelper.getSchoolName()} Powered by Anamme - #{applicationStatusBean.barCodeApplicationNumber}
+	    &copy; 2015 #{hostelSettingsService.getSchoolName()} Powered by Anamme - #{applicationStatusBean.barCodeApplicationNumber}
 	</div>
 	  
     </div>

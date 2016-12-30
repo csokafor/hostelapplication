@@ -6,13 +6,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.faces.bean.ManagedProperty;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import com.perblo.hostel.entity.HostelApplication;
 import com.perblo.hostel.entity.UnpaidHostelAllocation;
-import com.perblo.hostel.helper.HostelApplicationStatus;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import com.perblo.hostel.service.HostelApplicationStatus;
+
 import java.io.ByteArrayInputStream;
 import javax.annotation.PreDestroy;
 import javax.faces.application.FacesMessage;
@@ -29,6 +31,10 @@ import org.springframework.security.access.annotation.Secured;
 @Secured("Hostel Application Admin")
 public class HostelApplicationSearchBean implements Serializable {
     private static final Logger log = Logger.getLogger(HostelApplicationSearchBean.class);
+
+    @ManagedProperty(value = "#{hostelEntityManager}")
+    HostelEntityManagerImpl hostelEntityManager;
+
     private EntityManager entityManager;  
 	        
     private int pageSize = 20;    
@@ -53,7 +59,7 @@ public class HostelApplicationSearchBean implements Serializable {
     private List<HostelApplication> hostelApplications;
     
     public HostelApplicationSearchBean() {
-        this.entityManager = HostelEntityManagerListener.createEntityManager();        
+        this.entityManager = hostelEntityManager.getEntityManager();
     }
         
     public void search() {

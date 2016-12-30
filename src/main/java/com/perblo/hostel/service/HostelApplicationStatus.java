@@ -1,4 +1,4 @@
-package com.perblo.hostel.helper;
+package com.perblo.hostel.service;
 
 public class HostelApplicationStatus {
 

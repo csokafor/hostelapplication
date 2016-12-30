@@ -1,13 +1,14 @@
 package com.perblo.payment;
 
-import com.perblo.hostel.bean.HostelDAO;
 import com.perblo.hostel.entity.HostelApplication;
-import com.perblo.hostel.helper.HostelApplicationStatus;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
+import com.perblo.hostel.entitymanager.HostelEntityManager;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import com.perblo.hostel.service.HostelApplicationStatus;
 import com.perblo.payment.constants.TransactionStatus;
 import java.text.DecimalFormat;
 import java.util.List;
 
+import javax.faces.bean.ManagedProperty;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
@@ -20,16 +21,17 @@ import java.io.Serializable;
 import java.util.Calendar;
 import javax.annotation.PreDestroy;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
-import org.apache.log4j.Logger;
 
-@ManagedBean(name="paymentHelper")
-@SessionScoped
-public class PaymentHelper implements Serializable {
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service(value="paymentService")
+@Transactional
+public class PaymentService {
 	
     public static final String INTERSWITCH_MERTID = "InterswitchMertId";
     public static final String INTERSWITCH_PAYMENTITEMNAME = "InterswitchPayItemName";	
@@ -37,18 +39,19 @@ public class PaymentHelper implements Serializable {
     public static final String INTERSWITCH_PAYMENTURL = "InterswitchPaymentUrl";    
     public static final String INTERSWITCH_RESPONSEURL = "InterSwitchResponseUrl";
 
-    private static final Logger log = Logger.getLogger(PaymentHelper.class);    
-    private EntityManager entityManager;
-            
+    private static final Logger log = Logger.getLogger(PaymentService.class);
+
+    @Autowired
+    HostelEntityManager hostelEntityManager;
+
     private List<TransactionType> transactionTypes =  null;
     
-    public PaymentHelper() {
-    	this.entityManager = HostelEntityManagerListener.createEntityManager();
-        //log.info("entityManager: " + this.entityManager.toString());        
+    public PaymentService() {
+
     }          
     
     public String getPaymentSettingByName(String settingName) {
-    	Query query = entityManager.createNamedQuery("getPaymentSettingByName");
+    	Query query = hostelEntityManager.getEntityManager().createNamedQuery("getPaymentSettingByName");
     	query.setParameter(1, settingName);    	
     	List resultList = query.getResultList();    	
     	if(resultList.size() > 0) {
@@ -61,7 +64,7 @@ public class PaymentHelper implements Serializable {
     }
             
     public PaymentItem getPaymentItemByNameAndPolicy(String paymentItemName, Long policyId) {
-    	Query query = entityManager.createNamedQuery("getPaymentItemByNameAndPolicy");
+    	Query query = hostelEntityManager.getEntityManager().createNamedQuery("getPaymentItemByNameAndPolicy");
     	query.setParameter(1, paymentItemName);
     	query.setParameter(2, policyId);
     	List resultList = query.getResultList();
@@ -75,7 +78,7 @@ public class PaymentHelper implements Serializable {
     }
     
     public Pin getPinByPinNumber(String pinNumber) {
-    	Query query = entityManager.createNamedQuery("getPinByPinNumber");
+    	Query query = hostelEntityManager.getEntityManager().createNamedQuery("getPinByPinNumber");
     	query.setParameter(1, pinNumber);
     	
     	List resultList = query.getResultList();
@@ -86,6 +89,52 @@ public class PaymentHelper implements Serializable {
     		return null;
     	}
     	
+    }
+
+    public Pin addPin(String batchNumber, String serialNumber, String pinNumber, float pinValue, String loginUser) {
+        Pin pin = new Pin();
+        try {
+            pin.setBatchNumber(batchNumber);
+            pin.setSerialNumber(serialNumber);
+            pin.setPinNumber(pinNumber);
+            pin.setPinValue(pinValue);
+            pin.setEnabled(true);
+            pin.setUsedStatus(false);
+            pin.setGenerationDate(Calendar.getInstance().getTime());
+            pin.setDateUploaded(Calendar.getInstance().getTime());
+            pin.setUploadedBy(loginUser);
+
+            hostelEntityManager.persist(pin);
+
+        } catch(Exception e) {
+            log.error("Error addPin: " + e.getMessage());
+        }
+
+        return pin;
+    }
+
+    public String getPinUser(String pinNumber) {
+        String pinUser = null;
+        try {
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getPaymentTransactionByTransactionId");
+            query.setParameter(1, pinNumber);
+            PaymentTransaction paymentTx = (PaymentTransaction) query.getSingleResult();
+            if(paymentTx == null) {
+                pinUser = "Not found";
+            } else {
+                query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelApplicationByPaymentTransactionId");
+                query.setParameter(1, paymentTx.getId());
+                HostelApplication hostelApp = (HostelApplication) query.getSingleResult();
+                if(hostelApp != null) {
+                    pinUser = hostelApp.getStudentNumber();
+                }
+            }
+
+        } catch(Exception e) {
+            log.error("getPinUser exception: " + e.getMessage());
+        }
+
+        return pinUser;
     }
     
     public boolean processPinPayment(HostelApplication hostelApplication, String pinNumber, String paymentItem, double amount) {
@@ -101,8 +150,7 @@ public class PaymentHelper implements Serializable {
                 } else {
                     if (pin.getPinValue() == amount) {
                         Calendar calendar = Calendar.getInstance();
-                        EntityTransaction transaction = entityManager.getTransaction();
-                        transaction.begin();
+
                         PaymentTransaction paymentTxn = new PaymentTransaction();
                         paymentTxn.setAmount(amount);
                         paymentTxn.setDescription(paymentItem);
@@ -111,19 +159,18 @@ public class PaymentHelper implements Serializable {
                         paymentTxn.setStatus(TransactionStatus.SUCCESSFUL);
                         paymentTxn.setStatusMessage("Payment Successful");
                         paymentTxn.setTransactionId(pin.getPinNumber());
-                        paymentTxn.setTransactionType(this.getTransactionTypes().get(0));
-                        entityManager.persist(paymentTxn);
+                        //paymentTxn.setTransactionType(this.getTransactionTypes().get(0));
+                        hostelEntityManager.persist(paymentTxn);
 
                         pin.setUsedStatus(true);
                         pin.setDateUsed(calendar.getTime());
-                        entityManager.merge(pin);
+                        hostelEntityManager.merge(pin);
 
                         //update hostel application
                         hostelApplication.setPaymentStatus(HostelApplicationStatus.PAID);
                         hostelApplication.setPaymentTransactionId(paymentTxn.getId());
-                        entityManager.merge(hostelApplication);
-                        transaction.commit();
-                        
+                        hostelEntityManager.merge(hostelApplication);
+
                         paymentSuccessful = true;
                         log.info("Payment successful");
                     } else {
@@ -141,7 +188,7 @@ public class PaymentHelper implements Serializable {
     public PaymentTransaction getPaymentTransactionByTransactionId(String transactionId) {
         PaymentTransaction paymentTx = null;
         try {
-            Query query = entityManager.createNamedQuery("getPaymentTransactionByTransactionId");
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getPaymentTransactionByTransactionId");
             query.setParameter(1, transactionId);
 
             List resultList = query.getResultList();
@@ -158,7 +205,7 @@ public class PaymentHelper implements Serializable {
     
             
     public List<TransactionType> getTransactionTypes() {
-    	Query query = entityManager.createNamedQuery("getEnabledTransactionTypes"); 
+    	Query query = hostelEntityManager.getEntityManager().createNamedQuery("getEnabledTransactionTypes");
     	transactionTypes = query.getResultList();
 		return transactionTypes;
     }
@@ -500,11 +547,5 @@ public class PaymentHelper implements Serializable {
 
         return message;
     }
-    
-    @PreDestroy
-    public void destroyBean() {
-        if(entityManager.isOpen())
-            entityManager.close();
-        entityManager = null;        
-    }
+
 }

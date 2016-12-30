@@ -13,11 +13,12 @@
         <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
         <br/>
         <h:form enctype="multipart/form-data">
-            <p:growl id="Uploadmessages" showDetail="true" />
-            <p:fileUpload value="#{pinAdminBean.uploadedFile}" mode="simple" />
-            <p:commandButton value="Submit" ajax="false" actionListener="#{pinAdminBean.uploadFile}" />
-        </h:form>    
-               
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <h:inputFile id="pinupload" value="#{pinAdminBean.uploadedPinFile}" validator="#{pinAdminBean.validateExcelFile}" />
+            <h:commandButton action="#{pinAdminBean.uploadFile}" value="Upload File" >
+            </h:commandButton>
+        </h:form>
+
         <br/>
       
     </p:panel>              

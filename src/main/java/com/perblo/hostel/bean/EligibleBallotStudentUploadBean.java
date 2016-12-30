@@ -5,35 +5,38 @@
 package com.perblo.hostel.bean;
 
 import com.perblo.hostel.entity.*;
-import com.perblo.hostel.helper.HostelSettingsHelper;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
+import com.perblo.hostel.entitymanager.HostelEntityManager;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import com.perblo.hostel.service.HostelBallotService;
+import com.perblo.hostel.service.HostelConfig;
+import com.perblo.hostel.service.HostelSettingsService;
 import com.perblo.security.LoginUserBean;
-import java.io.File;
-import java.io.FileInputStream;
+
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import javax.annotation.PreDestroy;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
+import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
+import javax.faces.validator.ValidatorException;
 import javax.persistence.Query;
-import org.apache.log4j.Logger;
+import javax.servlet.http.Part;
 import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.primefaces.model.UploadedFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -44,15 +47,20 @@ import org.springframework.security.access.annotation.Secured;
 @SessionScoped
 @Secured("Hostel Admin")
 public class EligibleBallotStudentUploadBean implements Serializable {
-    
-    private static final Logger log = Logger.getLogger(EligibleBallotStudentUploadBean.class);
-    private EntityManager entityManager;  
-	        
-    @ManagedProperty(value="#{hostelSettingsHelper}")  
-    private HostelSettingsHelper hostelSettingsHelper;
-    
+
+    private static final Logger log = LoggerFactory.getLogger(EligibleBallotStudentUploadBean.class);
+
+    @ManagedProperty(value = "#{hostelEntityManager}")
+    HostelEntityManager hostelEntityManager;
+
+    @ManagedProperty(value="#{hostelSettingsService}")
+    private HostelSettingsService hostelSettingsService;
+
     @ManagedProperty(value="#{loginUserBean}")
     LoginUserBean loginUserBean;
+
+    @ManagedProperty(value="#{hostelBallotService}")
+    private HostelBallotService hostelBallotService;
                 
     private byte[] data;     
     private String fileExtension;    
@@ -64,12 +72,12 @@ public class EligibleBallotStudentUploadBean implements Serializable {
     private String searchParam;
         
     private int uploadRowIndex;
-    private UploadedFile uploadedFile;
+    private Part uploadedEligibleFile;
     private List<EligibleBallotStudent> eligibleBallotStudents;        
     private List<EligibleBallotStudent> uploadedEligibleBallotStudents;
     
     public EligibleBallotStudentUploadBean() {
-        this.entityManager = HostelEntityManagerListener.createEntityManager();   
+
     }
         
     public void uploadFile() {
@@ -78,11 +86,12 @@ public class EligibleBallotStudentUploadBean implements Serializable {
         eligibleBallotStudents  = new ArrayList<EligibleBallotStudent>();
         searchParam = "";
         uploadRowIndex = 0;
-        log.info("filename = " + uploadedFile.getFileName() + " contentType = " + 
-                uploadedFile.getContentType() + " data size = " + uploadedFile.getSize());
-        
-    	if(uploadedFile.getFileName().contains("xlsx") || uploadedFile.getFileName().contains("xls")) {
-            getEligibleBallotStudentData();
+
+        String fileName = getFilename(uploadedEligibleFile);
+        log.info("filename: " + fileName + " , contentType: " + uploadedEligibleFile.getContentType() + " , size: " + uploadedEligibleFile.getSize());
+
+    	if(fileName.contains("xlsx") || fileName.contains("xls")) {
+            getEligibleBallotStudentData(fileName);
         } else {
             FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, "Please upload an excel file.",""));             
@@ -90,129 +99,113 @@ public class EligibleBallotStudentUploadBean implements Serializable {
             	
     }
     
-    private void getEligibleBallotStudentData() {
+    private void getEligibleBallotStudentData(String fileName) {
                 
         String studentNumber;
         String studentName;
         String department;
-        String programme;
         String gender;
-        String studentType;
-        String hostel;                
-        
         log.info("getEligibleBallotStudentData");
         int numberOfRecords = 0;
 
         try {
-            
-            EntityTransaction transaction = entityManager.getTransaction();
-            transaction.begin();
 
             //check for xlsx files
-            if (uploadedFile.getFileName().contains("xlsx")) {
-                XSSFWorkbook workBook = new XSSFWorkbook(uploadedFile.getInputstream());
+            if (fileName.contains("xlsx")) {
+                XSSFWorkbook workBook = new XSSFWorkbook(uploadedEligibleFile.getInputStream());
                 XSSFSheet workSheet = workBook.getSheetAt(0);
-                Iterator<Row> rowsIter = workSheet.rowIterator();
-                while (rowsIter.hasNext()) {
-                    Row currentRow = rowsIter.next();
-                    if(currentRow.getRowNum() == 0) {
-                        continue;
-                    }
-                    Iterator<Cell> cellsIter = currentRow.cellIterator();
-                    //excel sheet format student number, student name, department, programme of study, gender
-                    while (cellsIter.hasNext()) {
-                        Cell studentNumberCell = cellsIter.next();
-                        studentNumberCell.setCellType(Cell.CELL_TYPE_STRING);
-                        studentNumber = studentNumberCell.getStringCellValue();
+                int noOfRows = workSheet.getPhysicalNumberOfRows();
+                log.info("no of rows " + workSheet.getPhysicalNumberOfRows());
 
-                        Cell studentNameCell = cellsIter.next();
-                        studentNameCell.setCellType(Cell.CELL_TYPE_STRING);
-                        studentName = studentNameCell.getStringCellValue();
+                for(int i = 1; i < noOfRows; i++) {
+                    Row row = workSheet.getRow(i);
+                    int noOfCells = row.getPhysicalNumberOfCells();
+                    log.info("upload row " + i + " no of cells " + noOfCells);
 
-                        Cell departmentCell = cellsIter.next();
-                        departmentCell.setCellType(Cell.CELL_TYPE_STRING);
-                        department = departmentCell.getStringCellValue();
+                    Cell studentNumberCell = row.getCell(0, Row.RETURN_BLANK_AS_NULL);
+                    studentNumber = studentNumberCell.getStringCellValue().trim().toUpperCase();
 
-                                                    /*
-                        Cell programmeCell = cellsIter.next();
-                        programmeCell.setCellType(Cell.CELL_TYPE_STRING);
-                        programme = programmeCell.getStringCellValue();
-                        */ 
-                        Cell genderCell = cellsIter.next();
-                        genderCell.setCellType(Cell.CELL_TYPE_STRING);
-                        gender = genderCell.getStringCellValue();
+                    Cell studentNameCell = row.getCell(1, Row.RETURN_BLANK_AS_NULL);
+                    studentName = studentNameCell.getStringCellValue().trim();
 
+                    Cell departmentCell = row.getCell(2, Row.RETURN_BLANK_AS_NULL);
+                    department = departmentCell.getStringCellValue().trim().toUpperCase();
 
-                        numberOfRecords++;
+                    Cell genderCell = row.getCell(3, Row.RETURN_BLANK_AS_NULL);
+                    gender = genderCell.getStringCellValue().trim().toUpperCase();
 
-                        log.info("studentNumber = " + studentNumber + ", studentName = " + studentName + " department = " + department);
+                    numberOfRecords++;
 
-                        EligibleBallotStudent eliStudent = this.getEligibleBallotStudentByStudentNumber(studentNumber);
-                        if(eliStudent == null) {
-                            Department departmentObj = this.getDepartmentById(department);
-                            if(departmentObj == null) {
-                                log.error("Department =" + departmentObj.getName() + " not found");
-                            } else {
-                                EligibleBallotStudent eligibleBallotStudent = this.addEligibleBallotStudent(studentNumber, studentName, departmentObj, gender);
-                                uploadedEligibleBallotStudents.add(eligibleBallotStudent);
-                            }    
+                    log.info("studentNumber = " + studentNumber + ", studentName = " + studentName + " department = " + department);
+
+                    EligibleBallotStudent eliStudent = this.getEligibleBallotStudentByStudentNumber(studentNumber);
+                    if(eliStudent == null) {
+                        Department departmentObj = this.getDepartmentByName(department);
+                        if(departmentObj == null) {
+                            log.error("Department =" + departmentObj.getName() + " not found");
                         } else {
-                            log.warn("Eligible student already exists for " + studentNumber);
+                            EligibleBallotStudent eligibleBallotStudent = hostelBallotService.addEligibleBallotStudent(
+                                    studentNumber, studentName, departmentObj, gender, loginUserBean.getCurrentUser().getUserName());
+                            uploadedEligibleBallotStudents.add(eligibleBallotStudent);
                         }
-
+                    } else {
+                        log.warn("Eligible student already exists for " + studentNumber);
                     }
-
                 }
 
             } else {
-                HSSFWorkbook hssfWorkBook = new HSSFWorkbook(uploadedFile.getInputstream());
+                HSSFWorkbook hssfWorkBook = new HSSFWorkbook(uploadedEligibleFile.getInputStream());
                 HSSFSheet hssfWorkSheet = hssfWorkBook.getSheetAt(0);
-                Iterator<Row> rowsIter = hssfWorkSheet.rowIterator();
-                while (rowsIter.hasNext()) {
-                    Row currentRow = rowsIter.next();
-                    if(currentRow.getRowNum() == 0) {
-                        continue;
-                    }
+                int noOfRows = hssfWorkSheet.getPhysicalNumberOfRows();
+                log.info("no of rows " + hssfWorkSheet.getPhysicalNumberOfRows());
 
-                    Iterator<Cell> cellsIter = currentRow.cellIterator();
-                    while (cellsIter.hasNext()) {
-                        Cell studentNumberCell = cellsIter.next();
-                        studentNumberCell.setCellType(Cell.CELL_TYPE_STRING);
-                        studentNumber = studentNumberCell.getStringCellValue();
+                for(int i = 1; i < noOfRows; i++) {
+                    Row row = hssfWorkSheet.getRow(i);
+                    int noOfCells = row.getPhysicalNumberOfCells();
+                    log.info("upload row " + i + " no of cells " + noOfCells);
 
-                        Cell studentNameCell = cellsIter.next();
-                        studentNameCell.setCellType(Cell.CELL_TYPE_STRING);
-                        studentName = studentNameCell.getStringCellValue();
+                    Cell studentNumberCell = row.getCell(0, Row.RETURN_BLANK_AS_NULL);
+                    studentNumber = studentNumberCell.getStringCellValue().trim().toUpperCase();
 
-                        Cell departmentCell = cellsIter.next();
-                        departmentCell.setCellType(Cell.CELL_TYPE_STRING);
-                        department = departmentCell.getStringCellValue();                            
+                    Cell studentNameCell = row.getCell(1, Row.RETURN_BLANK_AS_NULL);
+                    studentName = studentNameCell.getStringCellValue().trim();
 
-                        Cell genderCell = cellsIter.next();
-                        genderCell.setCellType(Cell.CELL_TYPE_STRING);
-                        gender = genderCell.getStringCellValue();
+                    Cell departmentCell = row.getCell(2, Row.RETURN_BLANK_AS_NULL);
+                    department = departmentCell.getStringCellValue().trim().toUpperCase();
 
-                        numberOfRecords++;
+                    Cell genderCell = row.getCell(3, Row.RETURN_BLANK_AS_NULL);
+                    gender = genderCell.getStringCellValue().trim().toUpperCase();
 
-                        log.info("studentNumber = " + studentNumber + ", studentName = " + studentName + " department = " + department +
-                                ", gender = " + gender);
-
-                        EligibleBallotStudent eliStudent = this.getEligibleBallotStudentByStudentNumber(studentNumber);
-                        if(eliStudent == null) {
-                            Department departmentObj = this.getDepartmentById(department);
-                            if(departmentObj == null) {
-                                log.error("Department =" + departmentObj.getName() + " not found");
-                            } else {
-                                EligibleBallotStudent eligibleBallotStudent = this.addEligibleBallotStudent(studentNumber, studentName, departmentObj, gender);
-                                uploadedEligibleBallotStudents.add(eligibleBallotStudent);
-                            }  
-                        } else {
-                            log.warn("Eligible student already exists for " + studentNumber);
+                    /*
+                    for (int colId = 0; colId < noOfCells; colId++) {
+                        Cell cell = row.getCell(colId, Row.RETURN_BLANK_AS_NULL);
+                        if (cell != null) {
+                            String cellValue = cell.getStringCellValue();
+                            log.info("upload row " + i + " cell " + colId + " " + cellValue);
                         }
+                    }
+                    */
+
+                    numberOfRecords++;
+
+                    log.info("studentNumber = " + studentNumber + ", studentName = " + studentName + " department = " + department);
+
+                    EligibleBallotStudent eliStudent = this.getEligibleBallotStudentByStudentNumber(studentNumber);
+                    if(eliStudent == null) {
+                        Department departmentObj = this.getDepartmentByName(department);
+                        if(departmentObj == null) {
+                            log.error("Department =" + departmentObj.getName() + " not found");
+                        } else {
+                            EligibleBallotStudent eligibleBallotStudent = hostelBallotService.addEligibleBallotStudent(
+                                    studentNumber, studentName, departmentObj, gender, loginUserBean.getCurrentUser().getUserName());
+                            uploadedEligibleBallotStudents.add(eligibleBallotStudent);
+                        }
+                    } else {
+                        log.warn("Eligible student already exists for " + studentNumber);
                     }
                 }
             }                             
-            transaction.commit();
+
            
         } catch (FileNotFoundException e) {
             log.error(e.getMessage(), e);
@@ -226,34 +219,11 @@ public class EligibleBallotStudentUploadBean implements Serializable {
         
     }
     
-    private EligibleBallotStudent addEligibleBallotStudent(String studentNumber, String studentName, Department department, String gender) {
-        EligibleBallotStudent eligibleBallotStudent = new EligibleBallotStudent();
-        try {
-            eligibleBallotStudent.setStudentNumber(studentNumber);
-            eligibleBallotStudent.setFirstName(studentName);
-            eligibleBallotStudent.setGender(gender);
-            eligibleBallotStudent.setDepartment(department);
-            //eligibleBallotStudent.setProgrammeOfStudy(programme);
-                                    
-            eligibleBallotStudent.setAcademicSession(hostelSettingsHelper.getCurrentAcademicSession().getSessionName());
-            eligibleBallotStudent.setDateUploaded(Calendar.getInstance().getTime());
-            eligibleBallotStudent.setUploadedBy(loginUserBean.getCurrentUser().getUserName());
-            
-            entityManager.persist(eligibleBallotStudent);
-            log.info("Eligible student created for " + studentNumber);
-            
-                        
-        } catch(Exception e) {
-            log.error("Error addEligibleBallotStudent: " + e.getMessage());
-        }
-        
-        return eligibleBallotStudent;
-    }
-    
+
     private Department getDepartmentById(String id) {
         Department department = null;
         try {
-            department = entityManager.find(Department.class, Long.parseLong(id));
+            department = hostelEntityManager.getEntityManager().find(Department.class, Long.parseLong(id));
                       
             
         } catch(Exception e) {
@@ -263,11 +233,26 @@ public class EligibleBallotStudentUploadBean implements Serializable {
         return department;
         
     }
+
+    private Department getDepartmentByName(String name) {
+        Department department = null;
+        try {
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getDepartmentByName");
+            query.setParameter(1, name);
+            department = (Department) query.getSingleResult();
+
+        } catch(Exception e) {
+            log.error("Error in getDepartmentByName: " + e.getLocalizedMessage());
+        }
+
+        return department;
+
+    }
     
     private HostelStudentType getHostelStudentType(String studentType) {
         HostelStudentType hostelStudentType = null;
         try {
-            Query query = entityManager.createNamedQuery("getHostelStudentTypeByStudentType");
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelStudentTypeByStudentType");
             query.setParameter(1, studentType);
             
             hostelStudentType = (HostelStudentType)query.getSingleResult();
@@ -283,7 +268,7 @@ public class EligibleBallotStudentUploadBean implements Serializable {
     private EligibleBallotStudent getEligibleBallotStudentByStudentNumber(String studentNumber) {
         EligibleBallotStudent eligibleBallotStudent = null;
         try {
-            Query query = entityManager.createNamedQuery("getEligibleBallotStudentByStudentNumber");
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getEligibleBallotStudentByStudentNumber");
             query.setParameter(1, studentNumber);
             
             eligibleBallotStudent = (EligibleBallotStudent)query.getSingleResult();
@@ -299,7 +284,7 @@ public class EligibleBallotStudentUploadBean implements Serializable {
     private HostelRoomBedSpace getHostelRoomBedSpaceByPosition(String space) {
         HostelRoomBedSpace hostelRoomBedSpace = null;
         try {
-            Query query = entityManager.createNamedQuery("getHostelRoomBedSpaceByPosition");
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelRoomBedSpaceByPosition");
             query.setParameter(1, space);
             
             hostelRoomBedSpace = (HostelRoomBedSpace)query.getSingleResult();
@@ -315,7 +300,7 @@ public class EligibleBallotStudentUploadBean implements Serializable {
     private Hostel getHostelByName(String hostelName) {
         Hostel hostel = null;
         try {
-            Query query = entityManager.createNamedQuery("getHostelByName");
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelByName");
             query.setParameter(1, hostelName);
             
             hostel = (Hostel)query.getSingleResult();
@@ -331,7 +316,7 @@ public class EligibleBallotStudentUploadBean implements Serializable {
     private HostelRoom getHostelRoomByHostelAndRoomNumber(Hostel hostel, String roomNumber) {
         HostelRoom hostelRoom = null;
         try {
-            Query query = entityManager.createNamedQuery("getHostelRoomByHostelAndRoomNumber");
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelRoomByHostelAndRoomNumber");
             query.setParameter(1, hostel.getId());
             query.setParameter(2, roomNumber);
             
@@ -369,7 +354,7 @@ public class EligibleBallotStudentUploadBean implements Serializable {
         if (!queryString.equalsIgnoreCase("%%")) {
             queryString = "select t from EligibleBallotStudent t where lower(t.firstName) like '%" + searchParam + "%'"
                     + " or lower(t.department.name) like '%" + searchParam + "%' or lower(t.studentNumber) like '" + searchParam + "'";
-            query = entityManager.createQuery(queryString);
+            query = hostelEntityManager.getEntityManager().createQuery(queryString);
             
         } else {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -395,6 +380,34 @@ public class EligibleBallotStudentUploadBean implements Serializable {
     public String getSearchPattern() {
         return searchParam == null
                 ? "%" : '%' + searchParam.toLowerCase().replace('*', '%') + '%';
+    }
+
+    public void validateExcelFile(FacesContext ctx, UIComponent comp, Object value) {
+        List<FacesMessage> msgs = new ArrayList<FacesMessage>();
+        Part file = (Part) value;
+        String contentType = file.getContentType();
+        log.info("contentType: " + contentType);
+
+        String fileName = getFilename(file);
+        if (!(fileName.contains("xls") || fileName.contains("xlsx"))) {
+
+            msgs.add(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Invalid File",
+                    fileName + " is not a valid excel file"));
+        }
+        if (!msgs.isEmpty()) {
+            throw new ValidatorException(msgs);
+        }
+    }
+
+    private String getFilename(Part part) {
+        for (String cd : part.getHeader("content-disposition").split(";")) {
+            if (cd.trim().startsWith("filename")) {
+                String filename = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
+                return filename.substring(filename.lastIndexOf('/') + 1).substring(filename.lastIndexOf('\\') + 1);
+
+            }
+        }
+        return null;
     }
 
     public String getSearchParam() {
@@ -439,12 +452,28 @@ public class EligibleBallotStudentUploadBean implements Serializable {
         this.fileName = fileName;
     }
 
-    public HostelSettingsHelper getHostelSettingsHelper() {
-        return hostelSettingsHelper;
+    public HostelSettingsService getHostelSettingsService() {
+        return hostelSettingsService;
     }
 
-    public void setHostelSettingsHelper(HostelSettingsHelper hostelSettingsHelper) {
-        this.hostelSettingsHelper = hostelSettingsHelper;
+    public void setHostelSettingsService(HostelSettingsService hostelSettingsService) {
+        this.hostelSettingsService = hostelSettingsService;
+    }
+
+    public HostelBallotService getHostelBallotService() {
+        return hostelBallotService;
+    }
+
+    public void setHostelBallotService(HostelBallotService hostelBallotService) {
+        this.hostelBallotService = hostelBallotService;
+    }
+
+    public HostelEntityManager getHostelEntityManager() {
+        return hostelEntityManager;
+    }
+
+    public void setHostelEntityManager(HostelEntityManager hostelEntityManager) {
+        this.hostelEntityManager = hostelEntityManager;
     }
 
     public List<EligibleBallotStudent> getEligibleBallotStudents() {
@@ -463,12 +492,22 @@ public class EligibleBallotStudentUploadBean implements Serializable {
         this.uploadedEligibleBallotStudents = uploadedEligibleBallotStudents;
     }
 
+    /*
     public UploadedFile getUploadedFile() {
         return uploadedFile;
     }
 
     public void setUploadedFile(UploadedFile uploadedFile) {
         this.uploadedFile = uploadedFile;
+    }
+    */
+
+    public Part getUploadedEligibleFile() {
+        return uploadedEligibleFile;
+    }
+
+    public void setUploadedEligibleFile(Part uploadedEligibleFile) {
+        this.uploadedEligibleFile = uploadedEligibleFile;
     }
 
     public LoginUserBean getLoginUserBean() {
@@ -486,12 +525,6 @@ public class EligibleBallotStudentUploadBean implements Serializable {
     public void setUploadRowIndex(int uploadRowIndex) {
         this.uploadRowIndex = uploadRowIndex;
     }
-    
-    
-    @PreDestroy
-    public void destroyBean() {
-        if(entityManager.isOpen())
-            entityManager.close();
-        entityManager = null;        
-    }
+
+
 }

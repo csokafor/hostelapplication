@@ -1,6 +1,5 @@
 package com.perblo.payment;
 
-import com.perblo.hostel.bean.HostelDAO;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -8,7 +7,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import com.perblo.payment.PaymentHelper;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
 import com.perblo.payment.constants.TransactionStatus;
 import com.perblo.payment.constants.TransactionTypeConstant;
 import com.perblo.payment.entity.PaymentItem;
@@ -16,8 +15,8 @@ import com.perblo.payment.entity.PaymentTransaction;
 import com.perblo.payment.entity.Pin;
 import com.perblo.payment.entity.TransactionType;
 import com.perblo.hostel.entity.HostelApplication;
-import com.perblo.hostel.helper.HostelApplicationStatus;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
+import com.perblo.hostel.service.HostelApplicationStatus;
+
 import java.io.Serializable;
 import javax.annotation.PreDestroy;
 import javax.faces.application.FacesMessage;
@@ -25,9 +24,8 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
+
 import org.apache.log4j.Logger;
 
 //import com.perblo.transcript.interswitch.Webpay;
@@ -37,11 +35,15 @@ import org.apache.log4j.Logger;
 @SessionScoped
 public class PaymentRequestBean implements Serializable {
     
-    private static final Logger log = Logger.getLogger(PaymentRequestBean.class);    
+    private static final Logger log = Logger.getLogger(PaymentRequestBean.class);
+
+    @ManagedProperty(value = "#{hostelEntityManager}")
+    HostelEntityManagerImpl hostelEntityManager;
+
     private EntityManager entityManager;
     
-    @ManagedProperty(value="#{paymentHelper}")
-    private PaymentHelper paymentHelper;
+    @ManagedProperty(value="#{paymentService}")
+    private PaymentService paymentService;
     
     private List<TransactionType> transactionTypes;        
     private TransactionType transactionType;            
@@ -73,7 +75,7 @@ public class PaymentRequestBean implements Serializable {
     HostelApplication hostelApplication = null;
     
     public PaymentRequestBean() {
-        this.entityManager = HostelEntityManagerListener.createEntityManager();
+        this.entityManager = hostelEntityManager.getEntityManager();
         log.info("entityManager: " + this.entityManager.toString());   
     }
                 
@@ -224,9 +226,9 @@ public class PaymentRequestBean implements Serializable {
     public void getPaymentSettings() {
     	    	
     	//get interswitch settings
-    	interswitchMertId = paymentHelper.getPaymentSettingByName(PaymentHelper.INTERSWITCH_MERTID);    	    	
-    	interswitchCadpId = paymentHelper.getPaymentSettingByName(PaymentHelper.INTERSWITCH_CADPID);
-    	interswitchPaymentUrl = paymentHelper.getPaymentSettingByName(PaymentHelper.INTERSWITCH_PAYMENTURL);
+    	interswitchMertId = paymentService.getPaymentSettingByName(PaymentService.INTERSWITCH_MERTID);
+    	interswitchCadpId = paymentService.getPaymentSettingByName(PaymentService.INTERSWITCH_CADPID);
+    	interswitchPaymentUrl = paymentService.getPaymentSettingByName(PaymentService.INTERSWITCH_PAYMENTURL);
     	    	
     }
     
@@ -336,7 +338,7 @@ public class PaymentRequestBean implements Serializable {
         log.info(":::::::: Payment NOT Successful");
         this.setInterswitchResponseCode("39");
         paymentSuccessful = false;
-        this.setInterswitchResponseMessage(paymentHelper.getInterswitchResponseCodeMessage(getInterswitchResponseCode()));
+        this.setInterswitchResponseMessage(paymentService.getInterswitchResponseCodeMessage(getInterswitchResponseCode()));
         paymentTransaction.setStatus(TransactionStatus.FAILED);
         paymentTransaction.setStatusMessage(this.getInterswitchResponseCode() + ":" +
                 this.getInterswitchResponseMessage());
@@ -395,7 +397,7 @@ public class PaymentRequestBean implements Serializable {
         } else {
             log.info(":::::::: Payment NOT Successful");
             paymentSuccessful = false;
-            this.setInterswitchResponseMessage(paymentHelper.getInterswitchResponseCodeMessage(getInterswitchResponseCode()));
+            this.setInterswitchResponseMessage(paymentService.getInterswitchResponseCodeMessage(getInterswitchResponseCode()));
             paymentTransaction.setStatus(TransactionStatus.FAILED);
             paymentTransaction.setStatusMessage(this.getInterswitchResponseCode() + ":" +
                     this.getInterswitchResponseMessage());
@@ -425,7 +427,7 @@ public class PaymentRequestBean implements Serializable {
     	paymentSuccessful = false;
         EntityTransaction transaction = entityManager.getTransaction();
     	try {
-    	Pin pin = paymentHelper.getPinByPinNumber(pinNumber);
+    	Pin pin = paymentService.getPinByPinNumber(pinNumber);
     	if(pin == null) {
             FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, "Pin Number doesnt exist!",""));
@@ -496,12 +498,12 @@ public class PaymentRequestBean implements Serializable {
         }
     }
 
-	public void setPaymentHelper(PaymentHelper paymentHelper) {
-		this.paymentHelper = paymentHelper;
+	public void setPaymentService(PaymentService paymentService) {
+		this.paymentService = paymentService;
 	}
 
-	public PaymentHelper getPaymentHelper() {
-		return paymentHelper;
+	public PaymentService getPaymentService() {
+		return paymentService;
 	}
 
 	public void setTransactionTypes(List<TransactionType> transactionTypes) {
@@ -509,7 +511,7 @@ public class PaymentRequestBean implements Serializable {
 	}
 
 	public List<TransactionType> getTransactionTypes() {
-		return paymentHelper.getTransactionTypes();
+		return paymentService.getTransactionTypes();
 	}
 	
 	public void setTransactionType(TransactionType transactionType) {

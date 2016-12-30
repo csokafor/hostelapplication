@@ -6,14 +6,15 @@
          id="WebApp_ID" version="3.0">
     <context-param>
         <param-name>javax.faces.PROJECT_STAGE</param-name>
-        <!--
+
         <param-value>Development</param-value>
-        -->
-        <param-value>Production</param-value>        
+        <!--
+        <param-value>Production</param-value>
+             -->
     </context-param>
     <context-param>
         <param-name>primefaces.THEME</param-name>
-        <param-value>sunny</param-value>
+        <param-value>bootstrap</param-value>
     </context-param>    
    <context-param>
            <param-name>contextConfigLocation</param-name>
@@ -96,10 +97,7 @@
      <listener>
     	<listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
     </listener>
-    <listener>
-        <listener-class>com.perblo.hostel.listener.HostelEntityManagerListener</listener-class>
-    </listener>
-    
+
     <session-config>
             <session-timeout>30</session-timeout>
     </session-config>

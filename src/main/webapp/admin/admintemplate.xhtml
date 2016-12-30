@@ -8,9 +8,18 @@
 	  xmlns:f="http://java.sun.com/jsf/core"
       >
 
-	<h:head>		
+	<h:head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link rel="icon" href="#{resource['img/favicon.ico']}" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
+        <!--
 		<h:outputStylesheet name="orange.css" library="css" />
-		<h:outputStylesheet name="style.css" library="css" />                
+		<h:outputStylesheet name="style.css" library="css" />
+		-->
+        <h:outputStylesheet name="hostel.css" library="css" />
 		<h:outputStylesheet name="js-image-slider.css" library="css" />
 		<h:outputScript name="js-image-slider.js" library="css" />                
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -20,42 +29,71 @@
     
     <h:body>
         <h:outputStylesheet name="primeface_ext.css" library="css" />
-	<div id="main">
-            <div id="links">
-                <h:outputText value="Welcome #{loginUserBean.user.lastName}"/> |  <h:form><h:commandLink value="Sign out" action="#{loginController.logout}" /></h:form>
+
+        <div class="container">
+            <h:form>
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <div class="row">
+                <div class="col-xs-12 col-md-9">
+                </div>
+                <div class="col-xs-6 col-md-3">
+                    <h:outputText value="Welcome #{loginUserBean.user.lastName}"/> |  <h:commandLink value="Sign out" action="#{loginController.logout}" />
+                </div>
             </div>
-                
-            <div id="logo"><h1>University of Calabar Student Affairs Division</h1><h2></h2></div>
-            
-            <div id="menu">
-                <h:form>
-                <p:menubar>
-                    <p:submenu label="Home">
-                        <p:menuitem value="Home" url="index.xhtml" />
-                    </p:submenu>
-                    <p:submenu label="Hostel Ballot">
-                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Eligible Ballot Admin" url="/admin/eligibleballotstudentupload.xhtml" />
-                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Ballot Admin" url="/admin/hostelballotapplicationlist.xhtml" />
-                    </p:submenu>
-                    <p:submenu label="Hostel Application">
-                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Application Admin" url="/admin/hostelapplicationlist.xhtml" />
-                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Student Admin" url="/admin/eligiblestudentlist.xhtml" />
-                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Eligible Student Admin" url="/admin/eligiblestudentupload.xhtml" />
-                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Hostel Admin" url="/admin/hosteladminlist.xhtml" />
-                    </p:submenu>
-                    <p:submenu label="Pin Admin">
-                        <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Check Pin Status" url="/admin/checkpinstatus.xhtml" />
-                        <p:menuitem rendered="#{loginUserBean.hasRole('Pin Admin')}" value="Pin Upload" url="/admin/pinupload.xhtml" />
-                    </p:submenu>
-                </p:menubar>
-                </h:form>
-            </div>	
-            <br/>
-    	<div id="content">    	
-            <ui:insert name="content" />	    
+            </h:form>
+        </div>
+
+        <div class="page-header page-title">
+            <div class="media">
+                <div class="media-right media-middle p-r-20">
+                    <a href="#">
+                        <img class="media-object" src="../resources/css/uni.png" alt="logo"/>
+                    </a>
+                </div>
+                <div class="media-body">
+                    <h2 class="media-heading">Student Affairs</h2>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="menu">
+            <h:form>
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <p:menubar>
+                <p:submenu label="Home">
+                    <p:menuitem value="Home" url="adminhome.xhtml" />
+                </p:submenu>
+                <p:submenu label="Hostel Ballot">
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Eligible Ballot Admin" url="/admin/eligibleballotstudentupload.xhtml" />
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Ballot Admin" url="/admin/hostelballotapplicationlist.xhtml" />
+                </p:submenu>
+                <p:submenu label="Hostel Application">
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Application Admin" url="/admin/hostelapplicationlist.xhtml" />
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Student Admin" url="/admin/eligiblestudentlist.xhtml" />
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Eligible Student Admin" url="/admin/eligiblestudentupload.xhtml" />
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Hostel Admin" url="/admin/hosteladminlist.xhtml" />
+                </p:submenu>
+                <p:submenu label="Pin Admin">
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Check Pin Status" url="/admin/checkpinstatus.xhtml" />
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Pin Admin')}" value="Pin Upload" url="/admin/pinupload.xhtml" />
+                </p:submenu>
+            </p:menubar>
+            </h:form>
+        </div>
+
+        <br/>
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-md-12">
+                    <ui:insert name="content" />
+                </div>
+            </div>
     	</div>
-    	<div id="footer">Copyright &copy; 2015 University of Calabar Student Affairs Division &nbsp;|&nbsp; Powered by Anamme &nbsp;|&nbsp; </div>
-    </div>
+
+        <footer class="footer">
+            <div class="container"> Copyright &copy; 2016 Hostel Application</div>
+        </footer>
     
     </h:body>
 

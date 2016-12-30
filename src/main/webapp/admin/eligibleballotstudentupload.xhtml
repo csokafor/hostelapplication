@@ -12,16 +12,15 @@
     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
        
     <p:panel>
-        <f:facet name="header">Upload Student Eligible for Ballot (Use standard excel file template)</f:facet>
+        <f:facet name="header">Upload Students Eligible for Ballot (Use standard excel file template)</f:facet>
         <br/>
-        <h:form enctype="multipart/form-data">
-            <p:growl id="Uploadmessages" showDetail="true" />
-            <p:fileUpload value="#{eligibleBallotUploadBean.uploadedFile}" mode="simple" />
-            <p:commandButton value="Submit" ajax="false" actionListener="#{eligibleBallotUploadBean.uploadFile}" />
-        </h:form>    
-               
+        <h:form id="eligibleuploadform" enctype="multipart/form-data">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <h:inputFile id="eligibleupload" value="#{eligibleBallotUploadBean.uploadedEligibleFile}" validator="#{eligibleBallotUploadBean.validateExcelFile}" />
+            <h:commandButton action="#{eligibleBallotUploadBean.uploadFile}" value="Upload File" >
+            </h:commandButton>
+        </h:form>
         <br/>
-            
     </p:panel>
     
     <p:panel rendered="#{eligibleBallotUploadBean.uploadedEligibleBallotStudents != null 
@@ -52,8 +51,9 @@
         </p:panel>
         <br/><br/>
         <p:panel>
-            <f:facet name="header">Student Search</f:facet>
-            <h:form id="search"> 
+            <f:facet name="header">Students Eligible for Ballot Search</f:facet>
+            <h:form id="search">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <br/><br/>        
                 <h:outputText value="Search By" /><p:spacer width="10" height="10" />
                 <h:inputText id="searchParam" required="true" value="#{eligibleBallotUploadBean.searchParam}"/>
@@ -64,7 +64,7 @@
         </p:panel>
             
         <p:panel>
-            <f:facet name="header">Search Result</f:facet>            
+            <f:facet name="header">Students Eligible for Ballot Search Result</f:facet>
                 
             <h:outputText id="NoStudentFoundMessage" value="No Student Found" 
                 rendered="#{eligibleBallotUploadBean.eligibleBallotStudents != null and eligibleBallotUploadBean.eligibleBallotStudents.size() == 0}"/>

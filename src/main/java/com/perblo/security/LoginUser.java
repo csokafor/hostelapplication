@@ -1,10 +1,12 @@
 package com.perblo.security;
 
 import com.perblo.hostel.entity.Role;
+
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LoginUser {
+public class LoginUser implements Serializable {
     private String firstName;
     private String lastName;
     private String userName;

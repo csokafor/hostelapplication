@@ -24,32 +24,37 @@ import javax.persistence.TemporalType;
 
 @Entity
 @NamedQueries({
-	@NamedQuery(
-		name="getAllDepartments",
-		query="select object(d) from Department d"
-	),
-	@NamedQuery(
-			name="getDepartmentByFacultyId",
-			query="select object(d) from Department d where d.faculty.id = ?1"
-		)
+    @NamedQuery(
+        name = "getAllDepartments",
+        query = "select object(d) from Department d"
+    ),
+    @NamedQuery(
+        name = "getDepartmentByFacultyId",
+        query = "select object(d) from Department d where d.faculty.id = ?1"
+    ),
+    @NamedQuery(
+            name = "getDepartmentByName",
+            query = "select object(d) from Department d where d.name = ?1"
+    )
 })
 
 public class Department implements Serializable {
 
     // seam-gen attributes (you should probably edit these)
-    private Long id;    
-        
+    private Long id;
+
     private Faculty faculty;
-            
+
     private String code;
-        
+
     private String name;
-        
+
     private Set<ProgrammeOfStudy> programmeOfStudy = new HashSet<ProgrammeOfStudy>();
-        
+
     // seam-gen attribute getters/setters with annotations (you probably should edit)
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     public Long getId() {
         return id;
     }
@@ -57,41 +62,41 @@ public class Department implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-	
-	public void setCode(String code) {
-		this.code = code;
-	}
 
-	public String getCode() {
-		return code;
-	}
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getCode() {
+        return code;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setFaculty(Faculty faculty) {
-		this.faculty = faculty;		
-	}
+    public String getName() {
+        return name;
+    }
 
-	@ManyToOne
-	@JoinColumn(name="faculty_fk")	
-	public Faculty getFaculty() {
-		return faculty;
-	}
+    public void setFaculty(Faculty faculty) {
+        this.faculty = faculty;
+    }
 
-	public void setProgrammeOfStudy(Set<ProgrammeOfStudy> programmeOfStudy) {
-		this.programmeOfStudy = programmeOfStudy;
-	}
+    @ManyToOne
+    @JoinColumn(name = "faculty_fk")
+    public Faculty getFaculty() {
+        return faculty;
+    }
 
-	@OneToMany(mappedBy="department", cascade=CascadeType.REMOVE)
+    public void setProgrammeOfStudy(Set<ProgrammeOfStudy> programmeOfStudy) {
+        this.programmeOfStudy = programmeOfStudy;
+    }
+
+    @OneToMany(mappedBy = "department", cascade = CascadeType.REMOVE)
     @OrderBy("id")
-	public Set<ProgrammeOfStudy> getProgrammeOfStudy() {
-		return programmeOfStudy;
-	}	   
-	
+    public Set<ProgrammeOfStudy> getProgrammeOfStudy() {
+        return programmeOfStudy;
+    }
+
 }

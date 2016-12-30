@@ -6,16 +6,13 @@ import com.perblo.hostel.entity.HostelAllocation;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import com.perblo.hostel.entity.HostelApplication;
-import com.perblo.hostel.helper.HostelApplicationHelper;
-import com.perblo.hostel.helper.HostelApplicationStatus;
-import com.perblo.hostel.helper.HostelRoomAllocationHelper;
-import com.perblo.hostel.helper.HostelSettingsHelper;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
-import com.perblo.payment.PaymentHelper;
+import com.perblo.hostel.entitymanager.HostelEntityManager;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import com.perblo.hostel.service.*;
+import com.perblo.payment.PaymentService;
 import com.perblo.payment.entity.PaymentTransaction;
 import com.perblo.payment.entity.Pin;
 import java.io.ByteArrayInputStream;
@@ -24,45 +21,39 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
-import javax.annotation.PreDestroy;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
+
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.UploadedFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @ManagedBean(name="applicationStatusBean")
 @SessionScoped
 public class HostelApplicationStatusBean implements Serializable {
 
-    private static final Logger log = Logger.getLogger(HostelApplicationStatusBean.class);
-        
-    private EntityManager entityManager;
-    
-    @ManagedProperty(value="#{hostelApplicationHelper}")
-    private HostelApplicationHelper hostelApplicationHelper;
+    private static final Logger log = LoggerFactory.getLogger(HostelApplicationStatusBean.class);
+
+    @ManagedProperty(value = "#{hostelEntityManager}")
+    HostelEntityManager hostelEntityManager;
+
+    @ManagedProperty(value="#{hostelApplicationService}")
+    private HostelApplicationService hostelApplicationService;
          
-    @ManagedProperty(value="#{hostelSettingsHelper}")
-    private HostelSettingsHelper hostelSettingsHelper;
+    @ManagedProperty(value="#{hostelSettingsService}")
+    private HostelSettingsService hostelSettingsService;
                 
-    @ManagedProperty(value="#{hostelRoomAllocationHelper}")
-    private HostelRoomAllocationHelper hostelRoomAllocationHelper;  
-    
-    @ManagedProperty(value="#{paymentHelper}")
-    private PaymentHelper paymentHelper;
-    
-    //@ManagedProperty(value="#{hostelDAO}")
-    //private HostelDAO hostelDAO;
-        
+    @ManagedProperty(value="#{hostelRoomAllocationService}")
+    private HostelRoomAllocationService hostelRoomAllocationService;
+
+    @ManagedProperty(value="#{paymentService}")
+    private PaymentService paymentService;
+
     private HostelApplication hostelApplication;
     private HostelAllocation hostelAllocation;
     private boolean loggedIn; 
@@ -83,25 +74,20 @@ public class HostelApplicationStatusBean implements Serializable {
     private boolean hasApplicationEnded;   
     private String hostelApplicationEndDate;
     private String barCodeApplicationNumber = "15000";
-        
-    //@In(required=false) 
+
     private String passportFileExtension;
-    //@In(required=false) 
     private String passportFileName; 
     private UploadedFile file;
     private DefaultStreamedContent passport;
     
     public HostelApplicationStatusBean() {
-    	this.entityManager = HostelEntityManagerListener.createEntityManager();
-        //log.info("entityManager: " + this.entityManager.toString());    
-        
         hostelApplication = new HostelApplication();
     }   
     
     public String checkHostelApplication() {
         try {
             //check hostel application getHostelApplicationByStudentNumber
-            hostelApplication = getHostelApplicationByStudentNumber(studentNumber);
+            hostelApplication = hostelApplicationService.getHostelApplicationByStudentNumber(studentNumber);
 
             if (hostelApplication == null) {
                 FacesContext.getCurrentInstance().addMessage(null,
@@ -109,7 +95,7 @@ public class HostelApplicationStatusBean implements Serializable {
             } else {
                 if (hostelApplication.getStudentType().getStudentType().equalsIgnoreCase("Scholarship")) {
                     //check new pin
-                    Pin pin = this.getPinByPinNumber(applicationNumber);
+                    Pin pin = paymentService.getPinByPinNumber(applicationNumber);
                     if (pin == null) {
                         log.warn(studentNumber + " entered invalid pin");
                         FacesContext.getCurrentInstance().addMessage(null,
@@ -117,8 +103,8 @@ public class HostelApplicationStatusBean implements Serializable {
                     } else {
                         if (pin.isUsedStatus()) {
                             log.info(studentNumber + " pin is used");
-                            PaymentTransaction paymentTx = paymentHelper.getPaymentTransactionByTransactionId(applicationNumber);
-                            HostelApplication studentHostelApp = getHostelApplicationByPaymentTransactionId(paymentTx.getId());
+                            PaymentTransaction paymentTx = paymentService.getPaymentTransactionByTransactionId(applicationNumber);
+                            HostelApplication studentHostelApp = hostelApplicationService.getHostelApplicationByPaymentTransactionId(paymentTx.getId());
                             if(studentHostelApp == null) {
                                 loggedIn = false;
                                 FacesContext.getCurrentInstance().addMessage(null,
@@ -129,7 +115,7 @@ public class HostelApplicationStatusBean implements Serializable {
 
                         } else {
                             log.info(studentNumber + " pin is not used");
-                            boolean paymentSuccessful = paymentHelper.processPinPayment(hostelApplication, applicationNumber, "Accommodation Fee", hostelApplication.getTotalAmount());
+                            boolean paymentSuccessful = paymentService.processPinPayment(hostelApplication, applicationNumber, "Accommodation Fee", hostelApplication.getTotalAmount());
                             if (paymentSuccessful) {
                                 loggedIn = true;
                             }
@@ -137,7 +123,7 @@ public class HostelApplicationStatusBean implements Serializable {
                     }
                 } else {
                     log.info("checkHostelApplication " + studentNumber);
-                    hostelApplication = getHostelApplicationByStudentNumberAndApplicationNumber(studentNumber, applicationNumber);
+                    hostelApplication = hostelApplicationService.getHostelApplicationByStudentNumberAndApplicationNumber(studentNumber, applicationNumber);
 
                     if (hostelApplication == null) {
                         loggedIn = false;
@@ -159,10 +145,9 @@ public class HostelApplicationStatusBean implements Serializable {
 
             }
             
-            
             //check hostel ballot end date
             Date now = new Date();
-            Date applicationEndDate = hostelSettingsHelper.getHostelApplicationEndDate();
+            Date applicationEndDate = hostelSettingsService.getHostelApplicationEndDate();
             if(now.after(applicationEndDate)) {
                 hasApplicationEnded = true;
                 log.info("application ended");
@@ -189,7 +174,8 @@ public class HostelApplicationStatusBean implements Serializable {
     public String confirmPayment() {
         boolean hasPaidSchoolFees = false;
                 
-        EligibleStudent eligibleStudent = hostelApplicationHelper.getEligibleStudentByStudentNumber(hostelApplication.getStudentNumber());
+        EligibleStudent eligibleStudent = hostelApplicationService.getEligibleStudentByStudentNumber(
+                hostelApplication.getStudentNumber());
         if(eligibleStudent == null) {
             hasPaidSchoolFees = false;
         } else {
@@ -211,7 +197,8 @@ public class HostelApplicationStatusBean implements Serializable {
         }
         
     }
-    
+
+    /*
     public void doAccommodationBallot() {
         log.info("HostelApplicationStatusAction.doAccommodationBallot() called");
         try {
@@ -219,7 +206,7 @@ public class HostelApplicationStatusBean implements Serializable {
             if(ballotNo < 2) {
                 log.info("ballotNo = " + ballotNo + ". Ballot succesful");                                
               
-                hostelAllocation = hostelRoomAllocationHelper.getHosteRoomAllocation(hostelApplication);   
+                hostelAllocation = hostelRoomAllocationService.getHosteRoomAllocation(hostelApplication);
                 if(hostelAllocation == null) {
                     log.info("hostelAllocation is null");                    
                     FacesContext.getCurrentInstance().addMessage(null,
@@ -230,8 +217,8 @@ public class HostelApplicationStatusBean implements Serializable {
                     FacesContext.getCurrentInstance().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_INFO, "Congratulations you won the ballot for accommodation. Please pay for your accommodation","")); 
                     
-                    hostelAllocation.setAcademicSession(hostelSettingsHelper.getCurrentAcademicSession());
-                    entityManager.persist(hostelAllocation);             
+                    hostelAllocation.setAcademicSession(hostelSettingsService.getCurrentAcademicSession());
+                    hostelEntityManager.getEntityManager().persist(hostelAllocation);
                     hostelApplication.setHostelAllocation(hostelAllocation);
                 }
                 
@@ -242,9 +229,9 @@ public class HostelApplicationStatusBean implements Serializable {
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Sorry you did not win ballot for accommodation.",""));  
             }
             if(hostelApplication.getId() == null) {
-                entityManager.persist(hostelApplication);
+                hostelEntityManager.getEntityManager().persist(hostelApplication);
             } else {
-                entityManager.merge(hostelApplication);
+                hostelEntityManager.getEntityManager().merge(hostelApplication);
             }
             
             
@@ -253,7 +240,8 @@ public class HostelApplicationStatusBean implements Serializable {
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, "Ballot for accommodation failed!",""));            
             log.error(e.getMessage(), e);
         }
-    }    
+    }
+    */
     
     public void allocateHostelForHandicapStudent() {
         log.info("allocateHostelForHandicapStudent called");
@@ -262,7 +250,7 @@ public class HostelApplicationStatusBean implements Serializable {
                 
                 FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "You are eligible for hostel accommodation!",""));
-                hostelAllocation = hostelRoomAllocationHelper.getHosteRoomAllocation(hostelApplication);
+                hostelAllocation = hostelRoomAllocationService.getHosteRoomAllocation(hostelApplication);
                 if (hostelAllocation == null) {
                     log.info("hostelAllocation is null");
                     FacesContext.getCurrentInstance().addMessage(null,
@@ -271,11 +259,11 @@ public class HostelApplicationStatusBean implements Serializable {
 
                 } else {
                     hostelApplication.setBallotStatus(HostelApplicationStatus.SUCCESSFUL);
-                    hostelAllocation.setAcademicSession(hostelSettingsHelper.getCurrentAcademicSession());
-                    entityManager.persist(hostelAllocation);
+                    hostelAllocation.setAcademicSession(hostelSettingsService.getCurrentAcademicSession());
+                    hostelEntityManager.getEntityManager().persist(hostelAllocation);
                     hostelApplication.setHostelAllocation(hostelAllocation);
                 }
-                entityManager.merge(hostelApplication);
+                hostelEntityManager.getEntityManager().merge(hostelApplication);
 
             } else {
                 FacesContext.getCurrentInstance().addMessage(null,
@@ -303,18 +291,15 @@ public class HostelApplicationStatusBean implements Serializable {
             //FacesContext.getCurrentInstance().addMessage(null, message);
             
             if(file.getContentType().contains("jpg") || file.getContentType().contains("jpeg")) {
-                                
-                EntityTransaction transaction = entityManager.getTransaction();
-                transaction.begin();
+
                 log.info("file content size: " + file.getContents().length);
                 log.info("content type: " + file.getContentType());
                 log.info("file name: " + file.getFileName());
                 
                 hostelApplication.setPassportData(file.getContents());
                 hostelApplication.setPassportContentType(file.getContentType());
-                entityManager.merge(hostelApplication);
-                transaction.commit();
-                
+                hostelEntityManager.getEntityManager().merge(hostelApplication);
+
                 FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Passport has been uploaded.",""));                
             } else {
@@ -338,32 +323,7 @@ public class HostelApplicationStatusBean implements Serializable {
     public void setPassport(DefaultStreamedContent passport) {
         this.passport = passport;
     }
-    
-    
-   
-    /*
-    public void uploadPassport() {
-        try {
-            log.info("uploadPassport: passportContentType - " + hostelApplication.getPassportContentType());
-            
-            if(getPassportFileName().contains("jpg") || getPassportFileName().contains("jpeg")) {
-                entityManager.merge(hostelApplication);
-                FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Passport has been uploaded.",""));                
-            } else {
-                FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Please upload a jpg/jpeg file.",""));                 
-            }           
-    	    
-            
-        } catch(Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Passport upload failed!",""));            
-            log.error(e.getMessage(), e);
-        }            	
-    }
-    */
-    
+
     public String printApplicationStatus() {
         log.info("printApplicationStatus");
         return "printapplicationstatus";
@@ -383,101 +343,17 @@ public class HostelApplicationStatusBean implements Serializable {
        
     }
 
-    //@End
     public String cancel() {
         log.info("HostelApplicationStatusAction.cancel() called");
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();        
         return "index";
     }
 
-    //@End
     public String close() {
         log.info("HostelApplicationStatusAction.close() called");
         FacesContext.getCurrentInstance().getExternalContext().invalidateSession();        
         return "index";
     }
-    
-    private Pin getPinByPinNumber(String pinNumber) {
-        try {
-            Query query = entityManager.createNamedQuery("getPinByPinNumber");
-            query.setParameter(1, pinNumber);
-
-            List resultList = query.getResultList();
-            if(resultList.size() > 0) {
-                    Pin pin = (Pin)resultList.get(0);
-                    return pin;
-            } else {
-                    return null;
-            }
-        } catch(Exception e) {
-            log.error("Exception in getPinByPinNumber: " + e.getMessage());
-            return null;
-        }
-    	
-    }
-    
-    private HostelApplication getHostelApplicationByStudentNumberAndApplicationNumber(String studentNumber, String applicationNumber) {
-        HostelApplication hostelApp = null;
-        try {
-            Query queryObj = entityManager.createNamedQuery("getHostelApplicationByStudentNumberAndApplicationNumber");
-            queryObj.setParameter(1, studentNumber);
-            queryObj.setParameter(2, applicationNumber);
-            List<HostelApplication> results = queryObj.getResultList();
-
-            if (results.isEmpty()) {                
-                hostelApp = null;
-            } else {
-                hostelApp = (HostelApplication) results.get(0);                
-            }
-            
-        } catch(Exception e) {
-            log.error("Exception in getHostelApplicationByStudentNumberAndApplicationNumber: " + e.getMessage());            
-        }
-        
-        return hostelApp;
-    }
-    
-    private HostelApplication getHostelApplicationByStudentNumber(String studentNumber) {
-        HostelApplication hostelApp = null;
-        try {
-            Query queryObj = entityManager.createNamedQuery("getHostelApplicationByStudentNumber");
-            queryObj.setParameter(1, studentNumber);            
-            List<HostelApplication> results = queryObj.getResultList();
-
-            if (results.isEmpty()) {                
-                hostelApp = null;
-            } else {
-                hostelApp = (HostelApplication) results.get(0);                
-            }
-            
-        } catch(Exception e) {
-            log.error("Exception in getHostelApplicationByStudentNumberAndApplicationNumber: " + e.getMessage());            
-        }
-        
-        return hostelApp;
-    }
-    
-    private HostelApplication getHostelApplicationByPaymentTransactionId(long paymentTransactionId) {
-        HostelApplication hostelApp = null;
-        try {
-            Query queryObj = entityManager.createNamedQuery("getHostelApplicationByPaymentTransactionId");
-            queryObj.setParameter(1, paymentTransactionId);            
-            List<HostelApplication> results = queryObj.getResultList();
-
-            if (results.isEmpty()) {                
-                hostelApp = null;
-            } else {
-                hostelApp = (HostelApplication) results.get(0);                
-            }
-            
-        } catch(Exception e) {
-            log.error("Exception in getHostelApplicationByPaymentTransactionId: " + e.getMessage());            
-        }
-        
-        return hostelApp;
-    }
-      
-    
 
     public String getApplicationStatus() {
         return HostelApplicationStatus.getApplicationStatus(hostelApplication.getApplicationStatus());
@@ -609,7 +485,7 @@ public class HostelApplicationStatusBean implements Serializable {
     public String getHostelApplicationEndDate() {
      if(hostelApplicationEndDate == null) {            
         hostelApplicationEndDate = SimpleDateFormat.getDateTimeInstance(
-            DateFormat.MEDIUM, DateFormat.SHORT).format(hostelSettingsHelper.getHostelBallotEndDate());
+            DateFormat.MEDIUM, DateFormat.SHORT).format(hostelSettingsService.getHostelBallotEndDate());
     }
     return hostelApplicationEndDate;
     }
@@ -642,53 +518,45 @@ public class HostelApplicationStatusBean implements Serializable {
         this.cosId = cosId;
     }
 
-    public HostelApplicationHelper getHostelApplicationHelper() {
-        return hostelApplicationHelper;
+    public HostelApplicationService getHostelApplicationService() {
+        return hostelApplicationService;
     }
 
-    public void setHostelApplicationHelper(HostelApplicationHelper hostelApplicationHelper) {
-        this.hostelApplicationHelper = hostelApplicationHelper;
+    public void setHostelApplicationService(HostelApplicationService hostelApplicationService) {
+        this.hostelApplicationService = hostelApplicationService;
     }
 
-    public HostelSettingsHelper getHostelSettingsHelper() {
-        return hostelSettingsHelper;
+    public HostelSettingsService getHostelSettingsService() {
+        return hostelSettingsService;
     }
 
-    public void setHostelSettingsHelper(HostelSettingsHelper hostelSettingsHelper) {
-        this.hostelSettingsHelper = hostelSettingsHelper;
+    public void setHostelSettingsService(HostelSettingsService hostelSettingsService) {
+        this.hostelSettingsService = hostelSettingsService;
     }
 
-    public HostelRoomAllocationHelper getHostelRoomAllocationHelper() {
-        return hostelRoomAllocationHelper;
+    public HostelRoomAllocationService getHostelRoomAllocationService() {
+        return hostelRoomAllocationService;
     }
 
-    public void setHostelRoomAllocationHelper(HostelRoomAllocationHelper hostelRoomAllocationHelper) {
-        this.hostelRoomAllocationHelper = hostelRoomAllocationHelper;
+    public void setHostelRoomAllocationService(HostelRoomAllocationService hostelRoomAllocationService) {
+        this.hostelRoomAllocationService = hostelRoomAllocationService;
     }
 
-    public PaymentHelper getPaymentHelper() {
-        return paymentHelper;
+    public PaymentService getPaymentService() {
+        return paymentService;
     }
 
-    public void setPaymentHelper(PaymentHelper paymentHelper) {
-        this.paymentHelper = paymentHelper;
+    public void setPaymentService(PaymentService paymentService) {
+        this.paymentService = paymentService;
     }
 
-    /*
-    public HostelDAO getHostelDAO() {
-        return hostelDAO;
+    public HostelEntityManager getHostelEntityManager() {
+        return hostelEntityManager;
     }
 
-    public void setHostelDAO(HostelDAO hostelDAO) {
-        this.hostelDAO = hostelDAO;
+    public void setHostelEntityManager(HostelEntityManager hostelEntityManager) {
+        this.hostelEntityManager = hostelEntityManager;
     }
-    */
-    
-    @PreDestroy
-    public void destroyBean() {
-        if(entityManager.isOpen())
-            entityManager.close();
-        entityManager = null;       
-    }
+
     
 }

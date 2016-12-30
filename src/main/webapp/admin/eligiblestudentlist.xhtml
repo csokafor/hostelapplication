@@ -12,7 +12,8 @@
     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
     <p:panel>
         <f:facet name="header">Add Student</f:facet>
-        <h:form id="addstudent">     
+        <h:form id="addstudent">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <p:panelGrid columns="2" columnClasses="label, value">
             <h:outputText value="Student Number" />
             <h:inputText id="studentNumber" required="true" value="#{hostelAppSupportBean.studentNumber}"/>
@@ -24,7 +25,7 @@
             <h:selectOneMenu id="faculty" required="true" value="#{hostelAppSupportBean.facultyId}">
                 <f:ajax event="change" listener="#{hostelAppSupportBean.updateDepartmentList}" render="department" />
                 <f:selectItem itemLabel="Select Faculty" itemValue="0" />
-                <f:selectItems value="#{hostelApplicationHelper.faculties}" var="facultyItem"
+                <f:selectItems value="#{hostelApplicationService.faculties}" var="facultyItem"
                     itemLabel="#{facultyItem.name}" itemValue="#{facultyItem.id}"  />                        
             </h:selectOneMenu>
 
@@ -53,7 +54,7 @@
             <h:selectOneMenu id="newhostel" required="false" value="#{hostelAppSupportBean.hostelId}">
                 <f:ajax event="change" listener="#{hostelAppSupportBean.updateRoomList}" render="newroom" />
                 <f:selectItem itemLabel="Select Hostel" itemValue="0" />
-                <f:selectItems value="#{hostelApplicationHelper.hostels}" var="hostelItem"
+                <f:selectItems value="#{hostelApplicationService.hostels}" var="hostelItem"
                     itemLabel="#{hostelItem.hostelName}" itemValue="#{hostelItem.id}"  />                        
             </h:selectOneMenu>
 
@@ -67,7 +68,7 @@
             <h:outputText value="Bed Space" />     
             <h:selectOneMenu id="newbedspace" required="false" value="#{hostelAppSupportBean.roomBedSpaceId}">                
                 <f:selectItem itemLabel="Select Bed Space" itemValue="0" />
-                <f:selectItems value="#{hostelApplicationHelper.hostelRoomBedSpaces}" var="bedSpaceItem"
+                <f:selectItems value="#{hostelApplicationService.hostelRoomBedSpaces}" var="bedSpaceItem"
                                itemLabel="#{bedSpaceItem.position}" itemValue="#{bedSpaceItem.id}"  />                        
             </h:selectOneMenu>
         </p:panelGrid>    
@@ -79,16 +80,17 @@
     
     <p:panel>
         <f:facet name="header">Eligible Student Search</f:facet>
-        <h:form id="search">        
-        <br/>
-        <h:outputText value="Search Parameter" />
-        <p:spacer width="10" height="10" />                
-        <h:inputText id="searchString" value="#{hostelAppSupportBean.searchString}"/>
-        <br/>
-        <br/>
-        <h:commandButton id="searchEligibleStudent" value="Search" 
-            action="#{hostelAppSupportBean.search}" />
-        <br/>
+        <h:form id="search">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <br/>
+            <h:outputText value="Search Parameter" />
+            <p:spacer width="10" height="10" />
+            <h:inputText id="searchString" value="#{hostelAppSupportBean.searchString}"/>
+            <br/>
+            <br/>
+            <h:commandButton id="searchEligibleStudent" value="Search"
+                action="#{hostelAppSupportBean.search}" />
+            <br/>
         </h:form>
     </p:panel>
     <p:panel>
@@ -97,6 +99,7 @@
         <h:outputText id="NoEligibleStudentFoundMessage" value="No Eligible Student Found" 
                       rendered="#{hostelAppSupportBean.eligibleStudents != null and hostelAppSupportBean.eligibleStudents.size() == 0}"/>
         <h:form id="dataForm">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <p:dataTable id="eligibleStudents" value="#{hostelAppSupportBean.eligibleStudents}" var="eligibleStudent" 
             rows="10"  paginator="true" paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
             rowsPerPageTemplate="5,10,15"  rendered="#{hostelAppSupportBean.eligibleStudents.size() > 0}">

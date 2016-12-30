@@ -7,58 +7,76 @@
 	  xmlns:p="http://primefaces.org/ui"
 	  xmlns:f="http://java.sun.com/jsf/core">
 
-	<h:head>		
-		<h:outputStylesheet name="orange.css" library="css" />
-		<h:outputStylesheet name="style.css" library="css" />                
-		<h:outputStylesheet name="js-image-slider.css" library="css" />
-		<h:outputScript name="js-image-slider.js" library="css" />                
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<h:head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-                <title>Student Affairs</title>
+		<link rel="icon" href="#{resource['img/favicon.ico']}" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
+		<!--
+		<h:outputStylesheet name="orange.css" library="css" />
+		<h:outputStylesheet name="style.css" library="css" />
+		-->
+		<h:outputStylesheet name="hostel.css" library="css" />
+		<h:outputStylesheet name="js-image-slider.css" library="css" />
+		<h:outputScript name="js-image-slider.js" library="css" />
+		<h:outputScript name="jquery/jquery.js" library="primefaces" target="head"/>
+		<h:outputScript name="jquery/jquery-plugins.js" library="primefaces" target="head"/>
+
+		<title>Student Affairs</title>
 	</h:head>
     
     <h:body>
         <h:outputStylesheet name="primeface_ext.css" library="css" />
-	<div id="main">
-		<div id="links"><a href="#">Student Affairs</a> | <a href="#">Students</a></div>
-		<div id="logo"><h1>Student Affairs</h1><h2></h2></div>
-		<div id="menu">
-	      <ul>        
-	        <li><a href="index.xhtml">home</a></li>        
-	      </ul>
-	    </div>		
-    	<div id="content">
-    	<div id="column1">
-    		<div class="sidebaritem">
-	          <h1>Ballot</h1>
-	          <div class="sbilinks">	            
-	            <ul>
-	              <li><a href="hostelballotapplication.xhtml">Ballot Application</a></li>
-	              <li><a href="checkballotstatus.xhtml">Check Ballot Status</a></li>	              
-	            </ul>
-	          </div>
-	        </div>
-	        <div class="sidebaritem">
-	          <h1>Hostel Application</h1>
-	          <div class="sbilinks">	           
-	            <ul>
-	              <li><a href="hostelapplication.xhtml">Hostel Application</a></li>
-	              <li><a href="checkapplicationstatus.xhtml">Check Hostel Application</a></li>	              
-	            </ul>
-	          </div>
-	        </div>
-	        <div class="sidebaritem">
-	          <h1>other information</h1>
-	          <!-- **** INSERT OTHER INFORMATION HERE **** -->
-	          
-	        </div>
+
+		<div class="page-header page-title">
+			<div class="media">
+				<div class="media-right media-middle p-r-20">
+					<a href="#">
+						<img class="media-object" src="resources/css/uni.png" alt="logo"/>
+					</a>
+				</div>
+				<div class="media-body">
+					<h2 class="media-heading">Student Affairs</h2>
+				</div>
+			</div>
+		</div>
+
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-12 col-md-4">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h3 class="panel-title">Hostel Ballot</h3>
+						</div>
+						<div class="panel-body">
+							<ul class="nav nav-pills nav-stacked">
+								<li><a href="hostelballotapplication.xhtml" class="active">Ballot Application</a></li>
+								<li><a href="checkballotstatus.xhtml">Check Ballot Application</a></li>
+							</ul>
+						</div>
+					</div>
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h3 class="panel-title">Hostel Application</h3>
+						</div>
+						<div class="panel-body">
+							<ul class="nav nav-pills nav-stacked">
+								<li role="presentation"><a href="hostelapplication.xhtml">Hostel Application</a></li>
+								<li role="presentation"><a href="checkapplicationstatus.xhtml">Check Hostel Application</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="col-xs-6 col-md-8"><ui:insert name="content" /></div>
+			</div>
 	    </div>
-	    <div id="column2">
-	    	<ui:insert name="content" />
-	    </div>
-    	</div>
-    	<div id="footer">Copyright &copy; 2016 Hostel Application</div>
-    </div>
+
+    	<footer class="footer">
+			<div class="container"> Copyright &copy; 2016 Hostel Application</div>
+		</footer>
+
     
     </h:body>
 
