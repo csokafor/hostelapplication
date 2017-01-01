@@ -99,15 +99,16 @@
          
          
 	<h:form id="hostelApplicationStatusForm">
-           <br/>
-           <p> <h:selectBooleanCheckbox id="rulescheckbox" value="#{applicationStatusBean.agreedToRegulations}" />
-               I have carefully read the hostel rules and regulations and I promise to abide by them, if found wanting in any area I will accept whatever discipline is given to me by the school authorities.</p>
-                                  
-            <h:commandButton id="agreetorules" value="I Agree" onclick="if(!confirmCheckBox()){return false;}"
-                action="#{applicationStatusBean.acceptHostelRegulations}" rendered="#{applicationStatusBean.loggedIn}"/>
-                              
-           
-          </h:form>
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+       <br/>
+       <p> <h:selectBooleanCheckbox id="rulescheckbox" value="#{applicationStatusBean.agreedToRegulations}" />
+           I have carefully read the hostel rules and regulations and I promise to abide by them, if found wanting in any area I will accept whatever discipline is given to me by the school authorities.</p>
+
+        <h:commandButton id="agreetorules" value="I Agree" onclick="if(!confirmCheckBox()){return false;}"
+            action="#{applicationStatusBean.acceptHostelRegulations}" rendered="#{applicationStatusBean.loggedIn}"/>
+
+
+      </h:form>
     </p:panel>
     
 

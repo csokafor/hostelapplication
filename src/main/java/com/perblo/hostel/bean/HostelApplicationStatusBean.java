@@ -26,7 +26,9 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.Part;
 
+import org.apache.commons.io.IOUtils;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.UploadedFile;
 import org.slf4j.Logger;
@@ -77,7 +79,8 @@ public class HostelApplicationStatusBean implements Serializable {
 
     private String passportFileExtension;
     private String passportFileName; 
-    private UploadedFile file;
+    //private UploadedFile file;
+    private Part uploadedFile;
     private DefaultStreamedContent passport;
     
     public HostelApplicationStatusBean() {
@@ -198,51 +201,6 @@ public class HostelApplicationStatusBean implements Serializable {
         
     }
 
-    /*
-    public void doAccommodationBallot() {
-        log.info("HostelApplicationStatusAction.doAccommodationBallot() called");
-        try {
-            int ballotNo = random.nextInt(5);
-            if(ballotNo < 2) {
-                log.info("ballotNo = " + ballotNo + ". Ballot succesful");                                
-              
-                hostelAllocation = hostelRoomAllocationService.getHosteRoomAllocation(hostelApplication);
-                if(hostelAllocation == null) {
-                    log.info("hostelAllocation is null");                    
-                    FacesContext.getCurrentInstance().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Sorry a room could not be allocated to you.",""));  
-                    hostelApplication.setBallotStatus(HostelApplicationStatus.UNSUCCESSFUL);
-                } else {
-                    hostelApplication.setBallotStatus(HostelApplicationStatus.SUCCESSFUL);
-                    FacesContext.getCurrentInstance().addMessage(null,
-                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Congratulations you won the ballot for accommodation. Please pay for your accommodation","")); 
-                    
-                    hostelAllocation.setAcademicSession(hostelSettingsService.getCurrentAcademicSession());
-                    hostelEntityManager.getEntityManager().persist(hostelAllocation);
-                    hostelApplication.setHostelAllocation(hostelAllocation);
-                }
-                
-            } else {
-                log.info("ballotNo = " + ballotNo + ". Ballot not succesful");
-                hostelApplication.setBallotStatus(HostelApplicationStatus.UNSUCCESSFUL);
-                FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Sorry you did not win ballot for accommodation.",""));  
-            }
-            if(hostelApplication.getId() == null) {
-                hostelEntityManager.getEntityManager().persist(hostelApplication);
-            } else {
-                hostelEntityManager.getEntityManager().merge(hostelApplication);
-            }
-            
-            
-        } catch(Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Ballot for accommodation failed!",""));            
-            log.error(e.getMessage(), e);
-        }
-    }
-    */
-    
     public void allocateHostelForHandicapStudent() {
         log.info("allocateHostelForHandicapStudent called");
         try {
@@ -277,38 +235,47 @@ public class HostelApplicationStatusBean implements Serializable {
         }
     }
 
-    public UploadedFile getFile() {
-        return file;
+    public Part getUploadedFile() {
+        return uploadedFile;
     }
- 
-    public void setFile(UploadedFile file) {
-        this.file = file;
-    }
-     
-    public void upload() {
-        if(file != null) {
-            //FacesMessage message = new FacesMessage("Succesful", file.getFileName() + " is uploaded.");
-            //FacesContext.getCurrentInstance().addMessage(null, message);
-            
-            if(file.getContentType().contains("jpg") || file.getContentType().contains("jpeg")) {
 
-                log.info("file content size: " + file.getContents().length);
-                log.info("content type: " + file.getContentType());
-                log.info("file name: " + file.getFileName());
-                
-                hostelApplication.setPassportData(file.getContents());
-                hostelApplication.setPassportContentType(file.getContentType());
-                hostelEntityManager.getEntityManager().merge(hostelApplication);
+    public void setUploadedFile(Part uploadedFile) {
+        this.uploadedFile = uploadedFile;
+    }
+
+    public void upload() {
+        try {
+            String fileName = getFilename(uploadedFile);
+            log.info("filename: " + fileName + " , contentType: " + uploadedFile.getContentType() + " , size: " + uploadedFile.getSize());
+
+            if (fileName.contains("jpg") || fileName.contains("jpeg") || fileName.contains("png")) {
+                hostelApplicationService.setHostelApplicationPassport(hostelApplication, uploadedFile);
 
                 FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Passport has been uploaded.",""));                
+                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Passport has been uploaded.", ""));
+
             } else {
                 FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_INFO, "Please upload a jpg/jpeg file.",""));                 
-            }                     
-            
-            
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Please upload a jpg/jpeg/png file.", ""));
+            }
+
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Passport upload error.", ""));
+            log.error("upload error: " + e.getMessage(), e);
         }
+
+    }
+
+    private String getFilename(Part part) {
+        for (String cd : part.getHeader("content-disposition").split(";")) {
+            if (cd.trim().startsWith("filename")) {
+                String filename = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
+                return filename.substring(filename.lastIndexOf('/') + 1).substring(filename.lastIndexOf('\\') + 1);
+
+            }
+        }
+        return null;
     }
 
     public DefaultStreamedContent getPassport() {

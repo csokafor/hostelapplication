@@ -219,7 +219,7 @@ public class HostelApplicationBean implements Serializable {
             hostelApplication.setPaymentTransactionId(-1);
 
             hostelApplication.setApplicationNumber(generateApplicationNumber(hostelSettingsService.getApplicationNumber()));
-            hostelEntityManager.persist(hostelApplication);
+            hostelEntityManager.merge(hostelApplication);
 
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Your application has been saved, you can check your application status with your Student Number("

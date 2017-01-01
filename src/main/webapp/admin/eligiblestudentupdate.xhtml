@@ -11,21 +11,21 @@
                              
     <p:panel>        	
     <f:facet name="header">Hostel Allocation</f:facet>	                                      
-    <p:panelGrid columns="2" columnClasses="label, value">
-        <h:outputText value="Student Number" />
+    <p:panelGrid columns="2">
+        <h:outputLabel for="studentNumber" value="Student Number" />
         <h:outputText id="studentNumber" value="#{hostelAppSupportBean.eligibleStudent.studentNumber}"/>
 
-        <h:outputText value="Name" />
+        <h:outputLabel for="firstName" value="Name" />
         <h:outputText id="firstName" value="#{hostelAppSupportBean.eligibleStudent.firstName}"/>
 
-        <h:outputText value="Department" />
-        <h:outputText id="lastName" value="#{hostelAppSupportBean.eligibleStudent.department}"/>
+        <h:outputLabel for="department" value="Department" />
+        <h:outputText id="department" value="#{hostelAppSupportBean.eligibleStudent.department}"/>
 
-        <h:outputText value="Student Type" />
+        <h:outputLabel for="studentType" value="Student Type" />
         <h:outputText id="studentType" value="#{hostelAppSupportBean.eligibleStudent.hostelStudentType.studentType}"/>
 
-        <h:outputText value="Hostel" />
-        <h:outputText value="#{hostelAppSupportBean.hostelAllocation.hostelRoom.hostel.hostelName} #{hostelAppSupportBean.hostelAllocation.hostelRoom.roomNumber} (#{hostelAppSupportBean.hostelAllocation.hostelRoomBedSpace.position})"/> 
+        <h:outputText for="studenthostel" value="Hostel" />
+        <h:outputText id="studenthostel" value="#{hostelAppSupportBean.hostelAllocation.hostelRoom.hostel.hostelName} #{hostelAppSupportBean.hostelAllocation.hostelRoom.roomNumber} (#{hostelAppSupportBean.hostelAllocation.hostelRoomBedSpace.position})"/>
     </p:panelGrid>    
     </p:panel>
     <br/>     
@@ -33,6 +33,8 @@
     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
         		
     <h:form id="hostelApplicationForm">
+    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+    <p:panel>
     <p:tabView>
         <p:tab title="Update Student Number">
             <h:outputText value="New Student Number" /><p:spacer width="10" height="10" />     
@@ -66,11 +68,11 @@
             <br/><br/>
         </p:tab>
         <p:tab title="Change Hostel Allocation">
-            <p:panelGrid columns="2" columnClasses="label, value">
-            <h:outputText value="Student Number" />
+            <p:panelGrid columns="2">
+            <h:outputLabel for="hostelStudentNumber" value="Student Number" />
             <h:inputText id="hostelStudentNumber" readonly="true" required="false" value="#{hostelAppSupportBean.hostelStudentNumber}"/>
             
-            <h:outputText value="Hostel" />            
+            <h:outputLabel for="hostel" value="Hostel" />
             <h:selectOneMenu id="hostel" required="false" value="#{hostelAppSupportBean.hostelId}">
                 <f:ajax event="change" listener="#{hostelAppSupportBean.updateRoomList}" render="room" />
                 <f:selectItem itemLabel="Select Hostel" itemValue="0" />
@@ -78,14 +80,14 @@
                     itemLabel="#{hostelItem.hostelName}" itemValue="#{hostelItem.id}"  />                        
             </h:selectOneMenu>
 
-            <h:outputText value="Hostel Room" />                  
+            <h:outputLabel for="room" value="Hostel Room" />
             <h:selectOneMenu id="room" required="false" value="#{hostelAppSupportBean.hostelRoomId}">                
                 <f:selectItem itemLabel="Select Room" itemValue="0" />
                 <f:selectItems value="#{hostelAppSupportBean.hostelRooms}" var="roomItem"
                     itemLabel="#{roomItem.roomNumber}" itemValue="#{roomItem.id}"  />                        
             </h:selectOneMenu>
 
-            <h:outputText value="Bed Space" />     
+            <h:outputLabel for="bedspace" value="Bed Space" />
             <h:selectOneMenu id="bedspace" required="false" value="#{hostelAppSupportBean.roomBedSpaceId}">                
                 <f:selectItem itemLabel="Select Bed Space" itemValue="0" />
                 <f:selectItems value="#{hostelApplicationService.hostelRoomBedSpaces}" var="bedSpaceItem"
@@ -99,15 +101,15 @@
             <br/><br/>
         </p:tab>
         <p:tab title="Delete Student Records">
-            <p:panelGrid columns="2" columnClasses="label, value">
-                <h:outputText value="Student Number" />
-                <h:outputText value="#{hostelAppSupportBean.hostelStudentNumber}"/>
+            <p:panelGrid columns="2">
+                <h:outputLabel for="deleteStudentNumber" value="Student Number" />
+                <h:outputText id="deleteStudentNumber" value="#{hostelAppSupportBean.hostelStudentNumber}"/>
 
-                <h:outputText value="Name" />
+                <h:outputLabel for="firstName" value="Name" />
                 <h:outputText id="firstName" value="#{hostelAppSupportBean.eligibleStudent.firstName}"/>
 
-                <h:outputText value="Department" />
-                <h:outputText id="lastName" value="#{hostelAppSupportBean.eligibleStudent.department}"/>
+                <h:outputLabel for="deleteDepartment" value="Department" />
+                <h:outputText id="deleteDepartment" value="#{hostelAppSupportBean.eligibleStudent.department}"/>
             </p:panelGrid> 
             <br/>
             
@@ -118,7 +120,8 @@
             <p:commandButton value="Close" action="#{hostelAppSupportBean.close}"/>
             <br/><br/>
         </p:tab>
-    </p:tabView> 
+    </p:tabView>
+    </p:panel>
         
     <p:confirmDialog global="true">
         <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check"/>

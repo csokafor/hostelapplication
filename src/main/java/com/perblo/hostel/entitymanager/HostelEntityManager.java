@@ -15,7 +15,7 @@ public interface HostelEntityManager {
     public Object merge(Object object) throws Exception;
     public void persist(Object object) throws Exception;
     public <T> T findById(Class <T> objectClass, Serializable id) throws Exception;
-    public void delete(Object object) throws Exception;
+    public void delete(Class objectClass, Serializable id) throws Exception;
     /*
     public void deleteObject(Object object) throws Exception;
     public void deleteObject(Class objectClass, Serializable id) throws Exception;

@@ -138,9 +138,9 @@ public class EligibleBallotStudentUploadBean implements Serializable {
 
                     log.info("studentNumber = " + studentNumber + ", studentName = " + studentName + " department = " + department);
 
-                    EligibleBallotStudent eliStudent = this.getEligibleBallotStudentByStudentNumber(studentNumber);
+                    EligibleBallotStudent eliStudent = hostelBallotService.getEligibleBallotStudentByStudentNumber(studentNumber);
                     if(eliStudent == null) {
-                        Department departmentObj = this.getDepartmentByName(department);
+                        Department departmentObj = hostelBallotService.getDepartmentByName(department);
                         if(departmentObj == null) {
                             log.error("Department =" + departmentObj.getName() + " not found");
                         } else {
@@ -190,9 +190,9 @@ public class EligibleBallotStudentUploadBean implements Serializable {
 
                     log.info("studentNumber = " + studentNumber + ", studentName = " + studentName + " department = " + department);
 
-                    EligibleBallotStudent eliStudent = this.getEligibleBallotStudentByStudentNumber(studentNumber);
+                    EligibleBallotStudent eliStudent = hostelBallotService.getEligibleBallotStudentByStudentNumber(studentNumber);
                     if(eliStudent == null) {
-                        Department departmentObj = this.getDepartmentByName(department);
+                        Department departmentObj = hostelBallotService.getDepartmentByName(department);
                         if(departmentObj == null) {
                             log.error("Department =" + departmentObj.getName() + " not found");
                         } else {
@@ -218,118 +218,8 @@ public class EligibleBallotStudentUploadBean implements Serializable {
         } 
         
     }
-    
 
-    private Department getDepartmentById(String id) {
-        Department department = null;
-        try {
-            department = hostelEntityManager.getEntityManager().find(Department.class, Long.parseLong(id));
-                      
-            
-        } catch(Exception e) {
-            log.error("Error in getDepartmentById: " + e.getLocalizedMessage());
-        }
-        
-        return department;
-        
-    }
 
-    private Department getDepartmentByName(String name) {
-        Department department = null;
-        try {
-            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getDepartmentByName");
-            query.setParameter(1, name);
-            department = (Department) query.getSingleResult();
-
-        } catch(Exception e) {
-            log.error("Error in getDepartmentByName: " + e.getLocalizedMessage());
-        }
-
-        return department;
-
-    }
-    
-    private HostelStudentType getHostelStudentType(String studentType) {
-        HostelStudentType hostelStudentType = null;
-        try {
-            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelStudentTypeByStudentType");
-            query.setParameter(1, studentType);
-            
-            hostelStudentType = (HostelStudentType)query.getSingleResult();
-            
-            
-        } catch(Exception e) {
-            log.error("Error in getHostelStudentType: " + e.getLocalizedMessage());
-        }
-        
-        return hostelStudentType;
-    }
-    
-    private EligibleBallotStudent getEligibleBallotStudentByStudentNumber(String studentNumber) {
-        EligibleBallotStudent eligibleBallotStudent = null;
-        try {
-            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getEligibleBallotStudentByStudentNumber");
-            query.setParameter(1, studentNumber);
-            
-            eligibleBallotStudent = (EligibleBallotStudent)query.getSingleResult();
-            
-            
-        } catch(Exception e) {
-            log.error("Error in getEligibleBallotStudentByStudentNumber: " + e.getLocalizedMessage());
-        }
-        
-        return eligibleBallotStudent;
-    }
-    
-    private HostelRoomBedSpace getHostelRoomBedSpaceByPosition(String space) {
-        HostelRoomBedSpace hostelRoomBedSpace = null;
-        try {
-            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelRoomBedSpaceByPosition");
-            query.setParameter(1, space);
-            
-            hostelRoomBedSpace = (HostelRoomBedSpace)query.getSingleResult();
-            
-            
-        } catch(Exception e) {
-            log.error("Error in getHostelRoomBedSpaceByPosition: " + e.getLocalizedMessage());
-        }
-        
-        return hostelRoomBedSpace;
-    }
-    
-    private Hostel getHostelByName(String hostelName) {
-        Hostel hostel = null;
-        try {
-            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelByName");
-            query.setParameter(1, hostelName);
-            
-            hostel = (Hostel)query.getSingleResult();
-            
-            
-        } catch(Exception e) {
-            log.error("Error in getHostelByName: " + e.getLocalizedMessage());
-        }
-        
-        return hostel;
-    }
-    
-    private HostelRoom getHostelRoomByHostelAndRoomNumber(Hostel hostel, String roomNumber) {
-        HostelRoom hostelRoom = null;
-        try {
-            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelRoomByHostelAndRoomNumber");
-            query.setParameter(1, hostel.getId());
-            query.setParameter(2, roomNumber);
-            
-            hostelRoom = (HostelRoom)query.getSingleResult();
-            
-            
-        } catch(Exception e) {
-            log.error("Error in getHostelRoomByHostelAndRoomNumber: " + e.getLocalizedMessage());
-        }
-        
-        return hostelRoom;
-    }
-    
     public void search() {
        uploadedEligibleBallotStudents = new ArrayList<EligibleBallotStudent>();
        page = 0;

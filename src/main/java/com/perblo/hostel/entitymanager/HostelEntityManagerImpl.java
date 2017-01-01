@@ -40,8 +40,8 @@ public class HostelEntityManagerImpl implements HostelEntityManager {
         return entityManager.find(objectClass, id);
     }
 
-    public void delete(Object object) throws Exception {
-        entityManager.remove(object);
+    public void delete(Class objectClass, Serializable id) throws Exception {
+        entityManager.remove(entityManager.find(objectClass, id));
     }
 
 }

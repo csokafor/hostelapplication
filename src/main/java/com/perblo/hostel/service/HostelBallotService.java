@@ -224,6 +224,21 @@ public class HostelBallotService {
         return hostelApp;
     }
 
+    public Department getDepartmentByName(String name) {
+        Department department = null;
+        try {
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getDepartmentByName");
+            query.setParameter(1, name);
+            department = (Department) query.getSingleResult();
+
+        } catch(Exception e) {
+            log.error("Error in getDepartmentByName: " + e.getLocalizedMessage());
+        }
+
+        return department;
+
+    }
+
     public HostelEntityManager getHostelEntityManager() {
         return hostelEntityManager;
     }

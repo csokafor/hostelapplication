@@ -11,6 +11,7 @@
         
     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
     <h:form id="hostelPaymentForm">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <p:panel>
             <f:facet name="header">Accommodation Payment</f:facet>
             <p:panelGrid columns="2">
@@ -41,8 +42,7 @@
             <h:commandButton id="pay" value="Pay"
                              action="#{hostelPaymentBean.processPinPayment}" rendered="#{!hostelPaymentBean.paymentSuccessful}"/>
              &nbsp;&nbsp;&nbsp;&nbsp;
-            <h:commandButton id="cancel" value="Cancel"  action="#{hostelPaymentBean.cancel}" r
-                             endered="#{!hostelPaymentBean.paymentSuccessful}"/>
+            <h:commandButton id="cancel" value="Cancel"  action="#{hostelPaymentBean.cancel}" rendered="#{!hostelPaymentBean.paymentSuccessful}"/>
             <h:commandButton id="close" value="Close"
                              action="#{hostelPaymentBean.close}" rendered="#{hostelPaymentBean.paymentSuccessful}"/>
         </p:panel>    

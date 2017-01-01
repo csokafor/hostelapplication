@@ -18,19 +18,10 @@
 		  <url>https://github.com/csokafor</url>      
 		</developer>
 	</developers>
-	
-	<licenses>
-        <license>
-            <name>GNU General Public License, Version 3</name>
-            <url>http://www.gnu.org/licenses/gpl-3.0.html</url>
-            <distribution>manual</distribution>
-            <comments>A free, copyleft license for software and other kinds of works</comments>
-        </license>
-    </licenses>
-	
+
     <properties>
-        <spring.version>4.2.2.RELEASE</spring.version>
-        <spring.security.version>4.0.3.RELEASE</spring.security.version>
+        <spring.version>4.3.5.RELEASE</spring.version>
+        <spring.security.version>4.2.1.RELEASE</spring.security.version>
     </properties>
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
@@ -125,13 +116,15 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
-            <version>5.0.2.Final</version>
+            <version>5.2.6.Final</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-c3p0</artifactId>
-            <version>5.0.2.Final</version>
+            <version>5.2.6.Final</version>
         </dependency>
+        -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>

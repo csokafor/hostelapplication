@@ -16,7 +16,8 @@
             
         <p:panel header="Hostel Ballot" rendered="#{!ballotBean.hasBallotEnded}">
         	
-        	<h:form id="hostelApplicationForm">     	
+        	<h:form id="hostelApplicationForm">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
 	            <p:panelGrid columns="2">
                     <h:outputLabel for="academicSession" value="Academic Session" />

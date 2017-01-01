@@ -46,25 +46,5 @@
 			<property name="hibernate.jdbc.batch_size" value="100"/>
 		</properties>
 
-		<!--
-		<properties>			
-			<property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
-			<property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/hostel?useEncoding=true&amp;characterEncoding=UTF-8" />
-                        
-			<property name="hibernate.connection.username" value="root" />
-			<property name="hibernate.connection.password" value="r00t" />                      
-			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
-			<property name="hibernate.connection.provider_class"
-				value="org.hibernate.service.jdbc.connections.internal.C3P0ConnectionProvider" />
-			<property name="hibernate.hbm2ddl.auto" value="update" />
-			<property name="hibernate.c3p0.max_size" value="30" />
-			<property name="hibernate.c3p0.min_size" value="5" />
-			<property name="hibernate.c3p0.acquire_increment" value="5" />
-			<property name="hibernate.c3p0.idle_test_period" value="1000" />
-			<property name="hibernate.c3p0.max_statements" value="100" />
-			<property name="hibernate.c3p0.timeout" value="100" />
-		</properties>
-		-->
-
 	</persistence-unit>
 </persistence>

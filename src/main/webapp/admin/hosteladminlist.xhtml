@@ -13,7 +13,8 @@
     
     <p:panel>
         <f:facet name="header">Hostel Search</f:facet>
-        <h:form id="search"> 
+        <h:form id="search">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <br/>
             <br/>
             <h:outputText value="Hostel" />
@@ -33,25 +34,21 @@
         
        
     <p:panel rendered="#{hostelAdminSearchBean.hostel ne null}">
-        <p:panelGrid columns="2" columnClasses="label, value">   
-            <h:outputText value="Name" />
-            <h:outputText value="#{hostelAdminSearchBean.hostel.hostelName}" />
+        <p:panelGrid columns="2">
+            <h:outputLabel for="hostelName" value="Name" />
+            <h:outputText  id="hostelName" value="#{hostelAdminSearchBean.hostel.hostelName}" />
 
-            <h:outputText value="Gender" />
-            <h:outputText value="#{hostelAdminSearchBean.hostel.gender}" />
+            <h:outputLabel for="hostelGender" value="Gender" />
+            <h:outputText id="hostelGender" value="#{hostelAdminSearchBean.hostel.gender}" />
 
-            <h:outputText value="Description" />
-            <h:outputText value="#{hostelAdminSearchBean.hostel.description}" />
+            <h:outputLabel for="description" value="Description" />
+            <h:outputText id="description" value="#{hostelAdminSearchBean.hostel.description}" />
 
-            <h:outputText value="No of Rooms" />
-            <h:outputText value="#{hostelAdminSearchBean.hostel.numberOfRooms}" />                                
+            <h:outputLabel for="noOfRooms" value="No of Rooms" />
+            <h:outputText id="noOfRooms" value="#{hostelAdminSearchBean.hostel.numberOfRooms}" />
         </p:panelGrid>        
         <br/>
-        <h:form id="printhostel">
-        <h:commandLink id="printhostellist" value="[Print Hostel Student List]" action="#{hostelAdminSearchBean.printHostelList(hostelAdminSearchBean.hostelId)}" />                   
-        <br/>   
-        </h:form>
-    
+
         <f:facet name="header">Hostel Rooms</f:facet>           
                 
         <h:outputText id="NoHostelRoomsFoundMessage" value="No Hostel Room Found" 
@@ -64,10 +61,7 @@
             <p:column id="roomnumber" headerText="Room Number">                    
                 <h:outputText value="#{hostelRoom.roomNumber}" />
             </p:column>
-            <p:column id="maxoccupants" headerText="Max Occupants">                    
-                <h:outputText value="#{hostelRoom.numberOfOccupants}" />
-            </p:column>
-            <p:column id="nooccupants" headerText="No of Occupants">                    
+            <p:column id="nooccupants" headerText="No of Allocations">
                 <h:outputText value="#{hostelRoom.hostelAllocations.size()}" />
             </p:column>
             <p:column id="occupants" headerText="Occupants">                    

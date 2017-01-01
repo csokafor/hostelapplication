@@ -91,7 +91,7 @@ public class HostelBallotApplicationSearchBean implements Serializable {
         
         } 
         hostelBallotApplications = query.getResultList();
-        //hostelBallotApplications = query.setMaxResults(pageSize).setFirstResult(page * pageSize).getResultList();
+
     }
     
         

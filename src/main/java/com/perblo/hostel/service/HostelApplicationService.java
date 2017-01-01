@@ -3,6 +3,7 @@ package com.perblo.hostel.service;
 import com.perblo.hostel.entity.*;
 import com.perblo.hostel.entitymanager.HostelEntityManager;
 import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
+import javax.servlet.http.Part;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,6 +75,13 @@ public class HostelApplicationService implements Serializable {
         degreeClassList.add("Pass");
         
         random = new Random();
+    }
+
+    public void setHostelApplicationPassport(HostelApplication application, Part uploadedFile) throws Exception {
+        HostelApplication hostelApplication = hostelEntityManager.getEntityManager().find(HostelApplication.class, application.getId());
+        hostelApplication.setPassportData(IOUtils.toByteArray(uploadedFile.getInputStream()));
+        hostelApplication.setPassportContentType(uploadedFile.getContentType());
+        hostelEntityManager.getEntityManager().merge(hostelApplication);
     }
 
     public EligibleStudent addEligibleStudent(String studentNumber, String studentName, String department,
@@ -171,6 +180,19 @@ public class HostelApplicationService implements Serializable {
         return hostelRoom;
     }
 
+    public List<HostelRoom> getHostelRoomByHostel(Hostel hostel) {
+        List<HostelRoom> rooms = new ArrayList<HostelRoom>();
+        try {
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelRoomByHostel");
+            query.setParameter(1, hostel.getId());
+            rooms = query.getResultList();
+
+        } catch(Exception e) {
+            log.error("Error in getHostelRoomByHostel: " + e.getLocalizedMessage());
+        }
+
+        return rooms;
+    }
 
     public HostelStudentType getHostelStudentType(String studentType) {
         HostelStudentType hStudentType = null;

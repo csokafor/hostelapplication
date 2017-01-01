@@ -103,6 +103,7 @@ public class HostelBallotApplicationBean implements Serializable {
                 ballotApplication.setFaculty(hostelBallotService.getHostelEntityManager().findById(Faculty.class, facultyId));
                 if (departmentId > 0) {
                     ballotApplication.setDepartment(hostelBallotService.getHostelEntityManager().findById(Department.class, departmentId));
+                    log.info("departmentId " + departmentId + " name " + ballotApplication.getDepartment().getName());
                     if (cosId > 0) {
                         ballotApplication.setProgrammeOfStudy(hostelBallotService.getHostelEntityManager().findById(ProgrammeOfStudy.class, cosId));
                     }

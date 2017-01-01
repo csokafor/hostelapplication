@@ -21,7 +21,8 @@
     <p:panel rendered="#{!applicationBean.studentTypeSelected and !applicationBean.hasApplicationEnded}">        	
          <f:facet name="header">Select Category</f:facet>	
          		
-	<h:form id="studentCategoryForm">           
+	<h:form id="studentCategoryForm">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <p:panelGrid columns="2">
             <h:outputLabel for="studentType" value="Category" />
             <h:selectOneMenu id="studentType" value="#{applicationBean.hostelStudentType}">
@@ -46,7 +47,8 @@
            
     <p:panel rendered="#{applicationBean.studentTypeSelected}">        	
         <f:facet name="header">Hostel Application</f:facet>			
-        <h:form id="hostelApplicationForm">        
+        <h:form id="hostelApplicationForm">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <p:panelGrid columns="2">
             <h:outputLabel for="academicSession" value="Academic Session" />
             <h:inputText id="academicSession" readonly="true" value="#{hostelSettingsService.currentAcademicSession.sessionName}"/>

@@ -7,6 +7,7 @@ import java.util.Calendar;
 import javax.persistence.EntityManager;
 
 import com.perblo.hostel.entity.HostelApplication;
+import com.perblo.hostel.entitymanager.HostelEntityManager;
 import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
 import com.perblo.hostel.service.HostelApplicationService;
 
@@ -30,7 +31,7 @@ public class HostelPaymentBean implements Serializable {
     private static final Logger log = Logger.getLogger(HostelPaymentBean.class);
 
     @ManagedProperty(value = "#{hostelEntityManager}")
-    HostelEntityManagerImpl hostelEntityManager;
+    HostelEntityManager hostelEntityManager;
     
     @ManagedProperty(value="#{hostelApplicationService}")
     private HostelApplicationService hostelApplicationService;
@@ -180,11 +181,11 @@ public class HostelPaymentBean implements Serializable {
         this.hostelApplicationService = hostelApplicationService;
     }
 
-    public HostelEntityManagerImpl getHostelEntityManager() {
+    public HostelEntityManager getHostelEntityManager() {
         return hostelEntityManager;
     }
 
-    public void setHostelEntityManager(HostelEntityManagerImpl hostelEntityManager) {
+    public void setHostelEntityManager(HostelEntityManager hostelEntityManager) {
         this.hostelEntityManager = hostelEntityManager;
     }
 

@@ -11,7 +11,8 @@
         <f:facet name="header">Check Hostel Ballot</f:facet>
         <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
         
-	<h:form id="hostelApplicationStatusForm">            
+	<h:form id="hostelApplicationStatusForm">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <p:panelGrid columns="2">
                 <h:outputLabel for="studentNumber" value="Student Number" />
                 <h:inputText id="studentNumber" required="true" value="#{ballotStatusBean.studentNumber}"/>           
@@ -30,6 +31,7 @@
         <f:facet name="header">Ballot Information</f:facet>    
         
         <h:form id="hostelBallotStatusForm">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
             <p:panelGrid columns="2">
 
                 <h:outputLabel for="ballotNumber" value="Ballot Number" />

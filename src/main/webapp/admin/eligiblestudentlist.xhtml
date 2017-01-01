@@ -11,17 +11,17 @@
 
     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
     <p:panel>
-        <f:facet name="header">Add Student</f:facet>
+        <f:facet name="header">Add Eligible Student</f:facet>
         <h:form id="addstudent">
-            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-        <p:panelGrid columns="2" columnClasses="label, value">
-            <h:outputText value="Student Number" />
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <p:panelGrid columns="2">
+            <h:outputLabel for="studentNumber" value="Student Number" />
             <h:inputText id="studentNumber" required="true" value="#{hostelAppSupportBean.studentNumber}"/>
             
-            <h:outputText value="Student Name" />
+            <h:outputLabel for="studentName" value="Student Name" />
             <h:inputText id="studentName" required="true" value="#{hostelAppSupportBean.studentName}"/>
             
-            <h:outputText value="Faculty" />
+            <h:outputLabel for="faculty" value="Faculty" />
             <h:selectOneMenu id="faculty" required="true" value="#{hostelAppSupportBean.facultyId}">
                 <f:ajax event="change" listener="#{hostelAppSupportBean.updateDepartmentList}" render="department" />
                 <f:selectItem itemLabel="Select Faculty" itemValue="0" />
@@ -29,14 +29,14 @@
                     itemLabel="#{facultyItem.name}" itemValue="#{facultyItem.id}"  />                        
             </h:selectOneMenu>
 
-            <h:outputText value="Department" />
+            <h:outputLabel for="department" value="Department" />
             <h:selectOneMenu id="department" required="true" value="#{hostelAppSupportBean.departmentId}">                
                 <f:selectItem itemLabel="Select Department" itemValue="0" />
                 <f:selectItems id="departmentSelect" value="#{hostelAppSupportBean.departments}" var="departmentItem" itemLabel="#{departmentItem.name}" 
                                itemValue="#{departmentItem.id}"/>                             
             </h:selectOneMenu>      
             
-            <h:outputText value="Student Type" />             
+            <h:outputLabel for="studentType" value="Student Type" />
             <h:selectOneMenu id="studentType" value="#{hostelAppSupportBean.studentType}">
                 <f:selectItem id="eligible" itemLabel="Eligible" itemValue="Eligible"/>
                 <f:selectItem id="sports" itemLabel="Sports" itemValue="Sports"/>
@@ -50,7 +50,7 @@
                 <f:selectItem id="HallHostels" itemLabel="Hall 7 Hostels" itemValue="Hall 7 Hostels"/>
             </h:selectOneMenu>
             
-            <h:outputText value="Hostel" />            
+            <h:outputLabel for="newhostel" value="Hostel" />
             <h:selectOneMenu id="newhostel" required="false" value="#{hostelAppSupportBean.hostelId}">
                 <f:ajax event="change" listener="#{hostelAppSupportBean.updateRoomList}" render="newroom" />
                 <f:selectItem itemLabel="Select Hostel" itemValue="0" />
@@ -58,14 +58,14 @@
                     itemLabel="#{hostelItem.hostelName}" itemValue="#{hostelItem.id}"  />                        
             </h:selectOneMenu>
 
-            <h:outputText value="Hostel Room" />                  
+            <h:outputLabel for="newroom" value="Hostel Room" />
             <h:selectOneMenu id="newroom" required="false" value="#{hostelAppSupportBean.hostelRoomId}">                
                 <f:selectItem itemLabel="Select Room" itemValue="0" />
                 <f:selectItems value="#{hostelAppSupportBean.hostelRooms}" var="roomItem"
                     itemLabel="#{roomItem.roomNumber}" itemValue="#{roomItem.id}"  />                        
             </h:selectOneMenu>
 
-            <h:outputText value="Bed Space" />     
+            <h:outputLabel for="newbedspace" value="Bed Space" />
             <h:selectOneMenu id="newbedspace" required="false" value="#{hostelAppSupportBean.roomBedSpaceId}">                
                 <f:selectItem itemLabel="Select Bed Space" itemValue="0" />
                 <f:selectItems value="#{hostelApplicationService.hostelRoomBedSpaces}" var="bedSpaceItem"
@@ -77,7 +77,7 @@
         <br/>
         </h:form>
     </p:panel>
-    
+    <br/>
     <p:panel>
         <f:facet name="header">Eligible Student Search</f:facet>
         <h:form id="search">
@@ -94,7 +94,7 @@
         </h:form>
     </p:panel>
     <p:panel>
-        <f:facet name="header">Search Result</f:facet>
+        <f:facet name="header">Eligible Student Search Result</f:facet>
            
         <h:outputText id="NoEligibleStudentFoundMessage" value="No Eligible Student Found" 
                       rendered="#{hostelAppSupportBean.eligibleStudents != null and hostelAppSupportBean.eligibleStudents.size() == 0}"/>

@@ -13,7 +13,7 @@
             <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
             
             <p:panelGrid columns="2">
-            <h:outputText rendered="#{applicationBean.hostelApplicatonSaved}" value="Application Number" />
+            <h:outputLabel for="requestNumber" rendered="#{applicationBean.hostelApplicatonSaved}" value="Application Number" />
             <h:outputText rendered="#{applicationBean.hostelApplicatonSaved}" id="requestNumber" value="#{applicationBean.hostelApplication.applicationNumber}"/>
             
             <h:outputLabel for="studentNumber" value="Student Number" />
@@ -65,7 +65,8 @@
                  
             </p:panelGrid>
             <br/>
-             <h:form id="hostelApplicationForm">        
+             <h:form id="hostelApplicationForm">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <h:commandButton id="save" value="Save Application"
                     action="#{applicationBean.saveHostelApplication}" rendered="#{!applicationBean.hostelApplicatonSaved}"/>
                 <p:spacer width="10" height="10" />

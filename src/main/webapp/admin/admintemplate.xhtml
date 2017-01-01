@@ -15,16 +15,10 @@
         <link rel="icon" href="#{resource['img/favicon.ico']}" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" />
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
-        <!--
-		<h:outputStylesheet name="orange.css" library="css" />
-		<h:outputStylesheet name="style.css" library="css" />
-		-->
         <h:outputStylesheet name="hostel.css" library="css" />
-		<h:outputStylesheet name="js-image-slider.css" library="css" />
-		<h:outputScript name="js-image-slider.js" library="css" />                
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-                <title>UNICAL Student Affairs</title>
+        <title>Student Affairs</title>
 	</h:head>
     
     <h:body>
@@ -69,9 +63,9 @@
                     <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Ballot Admin" url="/admin/hostelballotapplicationlist.xhtml" />
                 </p:submenu>
                 <p:submenu label="Hostel Application">
-                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Application Admin" url="/admin/hostelapplicationlist.xhtml" />
-                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Student Admin" url="/admin/eligiblestudentlist.xhtml" />
-                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Eligible Student Admin" url="/admin/eligiblestudentupload.xhtml" />
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Hostel Application Admin" url="/admin/hostelapplicationlist.xhtml" />
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Application Admin')}" value="Eligible Student Admin" url="/admin/eligiblestudentlist.xhtml" />
+                    <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Eligible Student Upload" url="/admin/eligiblestudentupload.xhtml" />
                     <p:menuitem rendered="#{loginUserBean.hasRole('Hostel Admin')}" value="Hostel Admin" url="/admin/hosteladminlist.xhtml" />
                 </p:submenu>
                 <p:submenu label="Pin Admin">

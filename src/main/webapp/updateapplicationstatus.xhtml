@@ -21,9 +21,10 @@
             <h:outputText value="Upload Passport" />
             <br/><p:spacer width="10" height="10" /> 
             <h:form enctype="multipart/form-data">
-                <p:growl id="Uploadmessages" showDetail="true" />
-                <p:fileUpload value="#{applicationStatusBean.file}" mode="simple" />
-                <p:commandButton value="Submit" ajax="false" actionListener="#{applicationStatusBean.upload}" />
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                <h:inputFile id="fileupload" value="#{applicationStatusBean.uploadedFile}" />
+                <h:commandButton action="#{applicationStatusBean.upload}" value="Upload Passport" >
+                </h:commandButton>
             </h:form>   
             <br/>
             <p:panelGrid columns="2">
@@ -87,7 +88,7 @@
             </p:panelGrid>
             <br/>
             <h:form id="hostelApplicationForm">
-                                                               
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <h:commandButton id="pay" value="Pay for Accommodation" action="#{hostelPaymentBean.confirmStatusPayment(applicationStatusBean.hostelApplication)}" 
                          rendered="#{(!applicationStatusBean.hasPaid) and applicationStatusBean.hostelApplication.ballotStatus == 1}"/>            
                 <p:spacer width="10" height="10" />

@@ -11,6 +11,8 @@ import com.perblo.hostel.service.HostelApplicationService;
 import com.perblo.hostel.service.HostelSettingsService;
 
 import com.perblo.security.LoginUserBean;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -24,7 +26,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
 
 
@@ -36,8 +39,8 @@ import org.springframework.security.access.annotation.Secured;
 @ManagedBean(name="hostelAppSupportBean")
 @SessionScoped
 @Secured("Hostel Application Admin")
-public class HostelApplicationSupportBean {
-    private static final Logger log = Logger.getLogger(HostelApplicationSupportBean.class);
+public class HostelApplicationSupportBean implements Serializable {
+    private static final Logger log = LoggerFactory.getLogger(HostelApplicationSupportBean.class);
 
     @ManagedProperty(value = "#{hostelEntityManager}")
     HostelEntityManager hostelEntityManager;
@@ -84,6 +87,15 @@ public class HostelApplicationSupportBean {
            
     public void search() {
        page = 0;
+        studentNumber = "";
+        studentName = "";
+        studentType = "";
+        facultyId = 0;
+        departmentId = 0;
+        hostelId = 0;
+        hostelRoomId = 0;
+        roomBedSpaceId = 0;
+
        findEligibleStudents();
     }
     
@@ -142,15 +154,12 @@ public class HostelApplicationSupportBean {
         log.info("deleteStudent: " + eligibleStudent.getStudentNumber());
         try {
 
-            hostelAllocation = hostelEntityManager.getEntityManager().find(HostelAllocation.class, hostelAllocation.getId());
-            eligibleStudent = hostelEntityManager.getEntityManager().find(EligibleStudent.class, eligibleStudent.getId());
-
-            hostelEntityManager.delete(hostelAllocation);
-            hostelEntityManager.delete(eligibleStudent);
+            hostelEntityManager.delete(HostelAllocation.class, hostelAllocation.getId());
+            hostelEntityManager.delete(EligibleStudent.class, eligibleStudent.getId());
 
             HostelApplication hostelApplication = hostelApplicationService.getHostelApplicationByStudentNumber(newStudentNumber);
             if(hostelApplication != null) {
-                hostelEntityManager.delete(hostelApplication);
+                hostelEntityManager.delete(HostelApplication.class, hostelApplication.getId());
             }
 
             FacesContext.getCurrentInstance().addMessage(null,
@@ -361,7 +370,7 @@ public class HostelApplicationSupportBean {
         if(hostelId > 0) {
             hostel = hostelEntityManager.getEntityManager().find(Hostel.class, hostelId);
             hostelRooms.clear();
-            hostelRooms.addAll(hostel.getHostelRooms()); 
+            hostelRooms.addAll(hostelApplicationService.getHostelRoomByHostel(hostel));
         }          
     }
 

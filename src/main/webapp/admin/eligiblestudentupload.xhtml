@@ -14,13 +14,12 @@
     <p:panel>
         <f:facet name="header">Upload Students Eligible for Hostel (Use standard excel file template)</f:facet>
         <br/>
-        <h:form enctype="multipart/form-data">
+        <h:form id="eligibleuploadform" enctype="multipart/form-data">
             <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
-            <p:growl id="Uploadmessages" showDetail="true" />
-            <p:fileUpload value="#{eligibleStudentUploadBean.uploadedFile}" mode="simple" />
-            <p:commandButton value="Submit" ajax="false" actionListener="#{eligibleStudentUploadBean.uploadFile}" />
-        </h:form>    
-               
+            <h:inputFile id="eligibleupload" value="#{eligibleStudentUploadBean.uploadedEligibleFile}" validator="#{eligibleStudentUploadBean.validateExcelFile}" />
+            <h:commandButton action="#{eligibleStudentUploadBean.uploadFile}" value="Upload File" >
+            </h:commandButton>
+        </h:form>
         <br/>
             
     </p:panel>
@@ -83,12 +82,7 @@
                 </p:column>                        
                 <p:column id="udepartment" headerText="Department">                    
                     <h:outputText value="#{eligibleStudent.department}" />					
-                </p:column>                
-                <!--
-                <p:column id="uyearOfStudy" headerText="Year of Study">                    
-                    <h:outputText value="#{eligibleStudent.yearOfStudy}" />					
                 </p:column>
-                -->
                 <p:column id="studentType" headerText="Student Type">                    
                     <h:outputText value="#{eligibleStudent.hostelStudentType.studentType}" />					
                 </p:column>                
