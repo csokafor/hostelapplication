@@ -11,29 +11,40 @@
         
     <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
     <h:form id="hostelPaymentForm">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
         <p:panel>
-            <f:facet name="header">Payment Information</f:facet>
-            <p:panelGrid columns="2" columnClasses="label, value">
+            <f:facet name="header">Accommodation Payment</f:facet>
+            <p:panelGrid columns="2">
             
-            <h:outputText value="Application Number" />
+            <h:outputLabel for="requestNumber" value="Application Number" />
             <h:outputText id="requestNumber" value="#{hostelPaymentBean.hostelApplication.applicationNumber}"/>
             
-            <h:outputText value="Student Number" />
+            <h:outputLabel for="studentNumber" value="Student Number" />
             <h:outputText id="studentNumber" value="#{hostelPaymentBean.hostelApplication.studentNumber}"/>
 
-            <h:outputText value="Name" />
+            <h:outputLabel for="firstName" value="Name" />
             <h:outputText id="firstName" value="#{hostelPaymentBean.hostelApplication.lastName}, #{hostelPaymentBean.hostelApplication.firstName} #{hostelPaymentBean.hostelApplication.otherNames}"/>               
                                          
-            <h:outputText value="Total Amount" />                               
+            <h:outputLabel for="TotalAmount" value="Total Amount" />
             <h:outputText id="TotalAmount" value="#{hostelPaymentBean.hostelApplication.totalAmount}">        
                    <f:convertNumber type="currency" currencySymbol="=N="/>
-            </h:outputText>         	                
+            </h:outputText>
+
+            <h:outputLabel for="paymentStatus" value="Payment Status" />
+            <h:outputText id="paymentStatus" rendered="#{hostelPaymentBean.paymentSuccessful}" value="Payment Successful" />
+            <h:outputText rendered="#{!hostelPaymentBean.paymentSuccessful}" value="No Payment" />
+
+            <h:outputLabel for="pinNumber" rendered="#{!hostelPaymentBean.paymentSuccessful}" value="Pin Number" />
+            <h:inputSecret rendered="#{!hostelPaymentBean.paymentSuccessful}" id="pinNumber" required="true" value="#{hostelPaymentBean.pinNumber}"/>
+
             </p:panelGrid>   
             <br/>
-             <h:commandButton id="continue" value="Continue"
-                         action="#{paymentBean.processPayment(hostelPaymentBean.hostelApplication.applicationNumber,hostelPaymentBean.hostelApplication.totalAmount,'Accommodation Fee')}" />
+            <h:commandButton id="pay" value="Pay"
+                             action="#{hostelPaymentBean.processPinPayment}" rendered="#{!hostelPaymentBean.paymentSuccessful}"/>
              &nbsp;&nbsp;&nbsp;&nbsp;
-            <h:commandButton id="cancel" value="Cancel"  action="#{hostelPaymentBean.cancel}" />
+            <h:commandButton id="cancel" value="Cancel"  action="#{hostelPaymentBean.cancel}" rendered="#{!hostelPaymentBean.paymentSuccessful}"/>
+            <h:commandButton id="close" value="Close"
+                             action="#{hostelPaymentBean.close}" rendered="#{hostelPaymentBean.paymentSuccessful}"/>
         </p:panel>    
     </h:form>		
 </ui:define>

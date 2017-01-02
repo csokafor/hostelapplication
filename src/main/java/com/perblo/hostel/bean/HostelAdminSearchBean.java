@@ -10,35 +10,36 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import com.perblo.hostel.entity.Student;
-import com.perblo.hostel.helper.HostelApplicationHelper;
-import com.perblo.hostel.helper.HostelApplicationStatus;
-import com.perblo.hostel.helper.HostelSettingsHelper;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
-import static com.perblo.security.LoginManager.LOGIN_USER;
-import com.perblo.security.LoginUser;
+import com.perblo.hostel.entitymanager.HostelEntityManager;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import com.perblo.hostel.service.HostelApplicationService;
+import com.perblo.hostel.service.HostelApplicationStatus;
+import com.perblo.hostel.service.HostelConfig;
+import com.perblo.hostel.service.HostelSettingsService;
+
 import java.util.ArrayList;
 import java.util.Set;
 import javax.annotation.PreDestroy;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
-import javax.faces.context.FacesContext;
+
 import org.apache.log4j.Logger;
 
 @ManagedBean(name="hostelAdminSearchBean")
 @SessionScoped
-//@Restrict("#{s:hasRole('Hostel Admin')}")
 public class HostelAdminSearchBean implements Serializable {
     private static final Logger log = Logger.getLogger(HostelAdminSearchBean.class);
-    private EntityManager entityManager;    
+
+    @ManagedProperty(value = "#{hostelEntityManager}")
+    HostelEntityManager hostelEntityManager;
     
-    @ManagedProperty(value="#{hostelApplicationHelper}")
-    private HostelApplicationHelper hostelApplicationHelper;
+    @ManagedProperty(value="#{hostelApplicationService}")
+    private HostelApplicationService hostelApplicationService;
          
-    @ManagedProperty(value="#{hostelSettingsHelper}")
-    private HostelSettingsHelper hostelSettingsHelper;
-        
+    @ManagedProperty(value="#{hostelSettingsService}")
+    private HostelSettingsService hostelSettingsService;
+
     private int pageSize = 20;
     private int page;
     
@@ -50,7 +51,6 @@ public class HostelAdminSearchBean implements Serializable {
     private List<HostelRoom> allHostelRooms;
             
     public HostelAdminSearchBean() {
-        this.entityManager = HostelEntityManagerListener.createEntityManager();
         hostelRooms = new ArrayList<HostelRoom>();
         allHostelRooms = new ArrayList<HostelRoom>();
     }
@@ -74,12 +74,10 @@ public class HostelAdminSearchBean implements Serializable {
 
     public List<HostelRoom> getHostelRooms() {
 
-        Query query = entityManager.createNamedQuery("getHostelRoomByHostel");
+        Query query = hostelEntityManager.getEntityManager().createNamedQuery("getHostelRoomByHostel");
         query.setParameter(1, hostelId);
-        //hostelRooms = query.setMaxResults(pageSize).setFirstResult(page * pageSize).getResultList();
         hostelRooms = query.getResultList();
-        log.info("getHostelRooms()");
-        
+
         return hostelRooms;
     }
 
@@ -91,8 +89,8 @@ public class HostelAdminSearchBean implements Serializable {
         Set<HostelAllocation> hostelAllocations = hostelRoom.getHostelAllocations();        
         for(HostelAllocation hostelAllocation : hostelAllocations) {
                         
-            hostelApplication = hostelApplicationHelper.getHostelApplicationByAcademicSessionAndStudentNumber(
-                    hostelSettingsHelper.getCurrentAcademicSession().getId(), hostelAllocation.getStudentNumber());
+            hostelApplication = hostelApplicationService.getHostelApplicationByAcademicSessionAndStudentNumber(
+                    hostelSettingsService.getCurrentAcademicSession().getId(), hostelAllocation.getStudentNumber());
 
             if(hostelApplication !=  null && hostelApplication.getPaymentStatus() == HostelApplicationStatus.PAID) {
                 
@@ -112,10 +110,9 @@ public class HostelAdminSearchBean implements Serializable {
     public void printHostelList(Integer hostelId) {
         try {
             log.info("printHostelList()");
-            Hostel printHostel = entityManager.find(Hostel.class, hostelId);
+            Hostel printHostel = hostelEntityManager.getEntityManager().find(Hostel.class, hostelId);
             allHostelRooms = new ArrayList<HostelRoom>();
-            //Set<HostelRoom> hostelRooms = printHostel.getHostelRooms();
-            
+
             for(HostelRoom hostelRoom : printHostel.getHostelRooms()) {
                 allHostelRooms.add(hostelRoom);
             }
@@ -139,20 +136,20 @@ public class HostelAdminSearchBean implements Serializable {
         }
     }
 
-    public HostelApplicationHelper getHostelApplicationHelper() {
-        return hostelApplicationHelper;
+    public HostelApplicationService getHostelApplicationService() {
+        return hostelApplicationService;
     }
 
-    public void setHostelApplicationHelper(HostelApplicationHelper hostelApplicationHelper) {
-        this.hostelApplicationHelper = hostelApplicationHelper;
+    public void setHostelApplicationService(HostelApplicationService hostelApplicationService) {
+        this.hostelApplicationService = hostelApplicationService;
     }
 
-    public HostelSettingsHelper getHostelSettingsHelper() {
-        return hostelSettingsHelper;
+    public HostelSettingsService getHostelSettingsService() {
+        return hostelSettingsService;
     }
 
-    public void setHostelSettingsHelper(HostelSettingsHelper hostelSettingsHelper) {
-        this.hostelSettingsHelper = hostelSettingsHelper;
+    public void setHostelSettingsService(HostelSettingsService hostelSettingsService) {
+        this.hostelSettingsService = hostelSettingsService;
     }
 
     public int getHostelId() {
@@ -178,7 +175,7 @@ public class HostelAdminSearchBean implements Serializable {
     
     public Hostel getHostel() {
         if(hostelId > 0) {
-            hostel = entityManager.find(Hostel.class, hostelId);
+            hostel = hostelEntityManager.getEntityManager().find(Hostel.class, hostelId);
         }
         return hostel;
     }
@@ -194,12 +191,12 @@ public class HostelAdminSearchBean implements Serializable {
     public void setAllHostelRooms(List<HostelRoom> allHostelRooms) {
         this.allHostelRooms = allHostelRooms;
     }
-        
-    @PreDestroy
-    public void destroyBean() {
-        if(entityManager.isOpen())
-            entityManager.close();
-        entityManager = null;        
+
+    public HostelEntityManager getHostelEntityManager() {
+        return hostelEntityManager;
     }
-    
+
+    public void setHostelEntityManager(HostelEntityManager hostelEntityManager) {
+        this.hostelEntityManager = hostelEntityManager;
+    }
 }

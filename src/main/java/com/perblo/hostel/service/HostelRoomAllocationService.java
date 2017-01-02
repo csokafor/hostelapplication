@@ -2,15 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.perblo.hostel.helper;
+package com.perblo.hostel.service;
 
-import com.perblo.hostel.bean.HostelDAO;
 import com.perblo.hostel.entity.Hostel;
 import com.perblo.hostel.entity.HostelAllocation;
 import com.perblo.hostel.entity.HostelApplication;
 import com.perblo.hostel.entity.HostelRoom;
 import com.perblo.hostel.entity.HostelRoomBedSpace;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
+
 import java.io.Serializable;
 
 import java.util.ArrayList;
@@ -25,23 +24,25 @@ import javax.faces.bean.ApplicationScoped;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.SessionScoped;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import org.apache.log4j.Logger;
+import com.perblo.hostel.entitymanager.HostelEntityManager;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
  * @author chinedu
  */
 
-@ManagedBean(name="hostelRoomAllocationHelper")
-@ApplicationScoped
-public class HostelRoomAllocationHelper implements Serializable {
+@Service(value="hostelRoomAllocationService")
+@Transactional(value = "hostelTxManager", rollbackFor = Exception.class)
+public class HostelRoomAllocationService implements Serializable {
     
     public static final String UPPER_BED_RIGHT = "Upper Bed Right";
     public static final String UPPER_BED_LEFT = "Upper Bed Left";
@@ -58,15 +59,16 @@ public class HostelRoomAllocationHelper implements Serializable {
     public static final String HOSTEL_MEDICAL_FEMALE = "Medical Female";
     public static final String HOSTEL_MALE = "Male";
     public static final String HOSTEL_FEMALE = "Female";
-    private static final Logger log = Logger.getLogger(HostelRoomAllocationHelper.class);
-             
-    private EntityManager entityManager;
-                
-    @ManagedProperty(value="#{hostelApplicationHelper}")
-    private HostelApplicationHelper hostelApplicationHelper;
+    private static final Logger log = LoggerFactory.getLogger(HostelRoomAllocationService.class);
+
+    @Autowired
+    HostelEntityManager hostelEntityManager;
+
+    @ManagedProperty(value="#{hostelApplicationService}")
+    private HostelApplicationService hostelApplicationService;
          
-    @ManagedProperty(value="#{hostelSettingsHelper}")
-    private HostelSettingsHelper hostelSettingsHelper;
+    @ManagedProperty(value="#{hostelSettingsService}")
+    private HostelSettingsService hostelSettingsService;
     
     Random random = new Random();
     
@@ -114,9 +116,7 @@ public class HostelRoomAllocationHelper implements Serializable {
     //Hall 4,6,8,9: Space 1,2,3,4
 
     
-    public HostelRoomAllocationHelper() {
-    	this.entityManager = HostelEntityManagerListener.createEntityManager();        
-        log.info("HostelRoomAllocationHelper entityManager: " + this.entityManager.toString());     
+    public HostelRoomAllocationService() {
     }
     
     private void initializeHostelRooms() {
@@ -129,7 +129,7 @@ public class HostelRoomAllocationHelper implements Serializable {
             hostelRoomMap = new HashMap<String,ArrayList<HostelRoom>>();
             hostelRoomAllocationMap = new HashMap<String,Map<Long,Integer>>();
 
-            List<Hostel> hostels = hostelApplicationHelper.getHostelList();
+            List<Hostel> hostels = hostelApplicationService.getHostelList();
             for(Hostel hostel : hostels) {                
                 this.populateHostelRoomMap(hostel, hostelRoomMap, hostelRoomAllocationMap);
             }
@@ -189,19 +189,19 @@ public class HostelRoomAllocationHelper implements Serializable {
     public HostelAllocation getHosteRoomAllocation(HostelApplication hostelApplication) {
         HostelAllocation hostelAllocation = null;
         
-        if (hostelApplication.getStudentType().getStudentType().equalsIgnoreCase(hostelApplicationHelper.SCHOLARSHIP)) {
+        if (hostelApplication.getStudentType().getStudentType().equalsIgnoreCase(hostelApplicationService.SCHOLARSHIP)) {
             if(hostelApplication.getGender().equalsIgnoreCase("male")) {
                 hostelAllocation = getRoom(HOSTEL_SCHOLARSHIP_MALE, hostelApplication);
             } else {
                 hostelAllocation = getRoom(HOSTEL_SCHOLARSHIP_FEMALE, hostelApplication);
             }
-        } else if (hostelApplication.getStudentType().getStudentType().equalsIgnoreCase(hostelApplicationHelper.POST_GRADUATE)) {
+        } else if (hostelApplication.getStudentType().getStudentType().equalsIgnoreCase(hostelApplicationService.POST_GRADUATE)) {
             if(hostelApplication.getGender().equalsIgnoreCase("male")) {
                 hostelAllocation = getRoom(HOSTEL_PG_MALE, hostelApplication);
             } else {
                 hostelAllocation = getRoom(HOSTEL_PG_FEMALE, hostelApplication);
             }
-        } else if (hostelApplication.getStudentType().getStudentType().equalsIgnoreCase(hostelApplicationHelper.MEDICAL_STUDENT)) {
+        } else if (hostelApplication.getStudentType().getStudentType().equalsIgnoreCase(hostelApplicationService.MEDICAL_STUDENT)) {
             if(hostelApplication.getGender().equalsIgnoreCase("male")) {
                 hostelAllocation = getRoom(HOSTEL_MEDICAL_MALE, hostelApplication);
             } else {
@@ -427,14 +427,14 @@ public class HostelRoomAllocationHelper implements Serializable {
     }
     
     private List<HostelRoomBedSpace> getSixHostelRoomBedSpace() {
-        Query query = entityManager.createNamedQuery("getAllHostelRoomBedSpace");
+        Query query = hostelEntityManager.getEntityManager().createNamedQuery("getAllHostelRoomBedSpace");
         List<HostelRoomBedSpace> roomSpaces = (List<HostelRoomBedSpace>) query.getResultList();
         
         return roomSpaces;
     }
     
     private List<HostelRoomBedSpace> getFourHostelRoomBedSpace() {
-        Query query = entityManager.createNamedQuery("getFourRoomHostelRoomBedSpace");
+        Query query = hostelEntityManager.getEntityManager().createNamedQuery("getFourRoomHostelRoomBedSpace");
         List<HostelRoomBedSpace> roomSpaces = (List<HostelRoomBedSpace>) query.getResultList();
         
         return roomSpaces;
@@ -448,24 +448,21 @@ public class HostelRoomAllocationHelper implements Serializable {
         this.hostelRoomInitialized = hostelRoomInitialized;
     }
 
-    public HostelApplicationHelper getHostelApplicationHelper() {
-        return hostelApplicationHelper;
+    public HostelApplicationService getHostelApplicationService() {
+        return hostelApplicationService;
     }
 
-    public void setHostelApplicationHelper(HostelApplicationHelper hostelApplicationHelper) {
-        this.hostelApplicationHelper = hostelApplicationHelper;
+    public void setHostelApplicationService(HostelApplicationService hostelApplicationService) {
+        this.hostelApplicationService = hostelApplicationService;
     }
 
-    public HostelSettingsHelper getHostelSettingsHelper() {
-        return hostelSettingsHelper;
+    public HostelSettingsService getHostelSettingsService() {
+        return hostelSettingsService;
     }
 
-    public void setHostelSettingsHelper(HostelSettingsHelper hostelSettingsHelper) {
-        this.hostelSettingsHelper = hostelSettingsHelper;
+    public void setHostelSettingsService(HostelSettingsService hostelSettingsService) {
+        this.hostelSettingsService = hostelSettingsService;
     }
     
-    @PreDestroy
-    public void destroyBean() {
-        entityManager.close();        
-    }
+
 }

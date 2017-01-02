@@ -19,8 +19,8 @@ import javax.persistence.TemporalType;
 
 @Entity
 @NamedQueries({
-    @NamedQuery(name = "getAllAcademicSession",
-    query = "select object(a) from AcademicSession as a")
+    @NamedQuery(name = "getAllAcademicSession", query = "select object(a) from AcademicSession as a"),
+    @NamedQuery(name = "AcademicSession.findBySessionName", query = "select object(a) from AcademicSession as a where a.sessionName = :sessionName")
 })
 public class AcademicSession implements Serializable {
 

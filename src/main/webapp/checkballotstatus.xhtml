@@ -8,15 +8,16 @@
 <ui:define name="content">
 
     <p:panel rendered="#{!ballotStatusBean.loggedIn}">        	
-        <f:facet name="header">Check Ballot Application</f:facet>	
+        <f:facet name="header">Check Hostel Ballot</f:facet>
         <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
         
-	<h:form id="hostelApplicationStatusForm">            
-            <p:panelGrid columns="2" columnClasses="label, value">
-                <h:outputText value="Student Number" /> 
+	<h:form id="hostelApplicationStatusForm">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <p:panelGrid columns="2">
+                <h:outputLabel for="studentNumber" value="Student Number" />
                 <h:inputText id="studentNumber" required="true" value="#{ballotStatusBean.studentNumber}"/>           
-           
-                <h:outputText value="Ballot Number" />         
+
+                <h:outputLabel for="requestNumber" value="Ballot Number" />
                 <h:inputText id="requestNumber" required="true" value="#{ballotStatusBean.applicationNumber}"/>                                                            
             </p:panelGrid>
             <br/>
@@ -30,20 +31,21 @@
         <f:facet name="header">Ballot Information</f:facet>    
         
         <h:form id="hostelBallotStatusForm">
-            <p:panelGrid columns="2" columnClasses="label, value">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <p:panelGrid columns="2">
 
-                <h:outputText value="Ballot Number"/>
+                <h:outputLabel for="ballotNumber" value="Ballot Number" />
                 <h:outputText id="ballotNumber" value="#{ballotStatusBean.ballotApplication.applicationNumber}" />
 
-                <h:outputText value="Student Number" />
+                <h:outputLabel for="studentNumber" value="Student Number" />
                 <h:outputText id="studentNumber" value="#{ballotStatusBean.ballotApplication.studentNumber}"/>
 
-                <h:outputText value="Name" />
+                <h:outputLabel for="firstName" value="Name" />
                 <h:outputText id="firstName" 
                     value="#{ballotStatusBean.ballotApplication.lastName}, #{ballotStatusBean.ballotApplication.firstName} #{ballotStatusBean.ballotApplication.otherNames}"/>
 
-                <h:outputText value="Ballot"/>
-                <h:outputText rendered="#{ballotStatusBean.ballotStatus == 1}" value="Congratulations you picked YES" />
+                <h:outputLabel for="ballotStatus" value="Ballot"/>
+                <h:outputText id="ballotStatus" rendered="#{ballotStatusBean.ballotStatus == 1}" value="Congratulations you picked YES" />
                 <h:outputText rendered="#{ballotStatusBean.ballotStatus == 2}" value="Oops you picked NO" />                
                                 
             </p:panelGrid>      

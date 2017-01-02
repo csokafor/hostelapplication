@@ -8,14 +8,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 
 /**
  *
@@ -73,7 +66,7 @@ public class HostelRoom implements Serializable {
         this.roomNumber = roomNumber;
     }
 
-    @OneToMany(mappedBy="hostelRoom")
+    @OneToMany(fetch= FetchType.EAGER, mappedBy="hostelRoom")
     public Set<HostelAllocation> getHostelAllocations() {
         return hostelAllocations;
     }

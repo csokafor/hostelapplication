@@ -20,8 +20,9 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import org.apache.log4j.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.web.WebAttributes;
 
@@ -33,7 +34,8 @@ import org.springframework.security.web.WebAttributes;
 @RequestScoped
 public class LoginController implements PhaseListener {
 
-    private static final Logger log = Logger.getLogger(LoginController.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+
     /**
      *
      * Redirects the login request directly to spring security check. Leave this
@@ -112,7 +114,7 @@ public class LoginController implements PhaseListener {
                         WebAttributes.AUTHENTICATION_EXCEPTION, null);
                 FacesContext.getCurrentInstance().addMessage(null,
                         new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                                "Username or password not valid.", "Username or password not valid"));
+                                "Username or password not valid.", ""));
             } 
         }
         

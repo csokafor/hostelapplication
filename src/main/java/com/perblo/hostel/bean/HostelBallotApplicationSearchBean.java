@@ -4,16 +4,19 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import javax.persistence.EntityManager;
+import javax.faces.bean.ManagedProperty;
 import javax.persistence.Query;
 
 import com.perblo.hostel.entity.HostelBallotApplication;
-import com.perblo.hostel.helper.HostelApplicationStatus;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
-import javax.annotation.PreDestroy;
+import com.perblo.hostel.entitymanager.HostelEntityManager;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import com.perblo.hostel.service.HostelApplicationStatus;
+
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
 
 @ManagedBean(name="hostelBallotSearchBean")
@@ -21,9 +24,11 @@ import org.springframework.security.access.annotation.Secured;
 @Secured("Hostel Application Admin")
 public class HostelBallotApplicationSearchBean implements Serializable {
 
-    private static final Logger log = Logger.getLogger(HostelBallotApplicationSearchBean.class);
-    private EntityManager entityManager;  
-	       
+    private static final Logger log = LoggerFactory.getLogger(HostelBallotApplicationSearchBean.class);
+
+    @ManagedProperty(value = "#{hostelEntityManager}")
+    HostelEntityManager hostelEntityManager;
+
     private int pageSize = 20;    
     private int page;        
     private String searchString;    
@@ -37,15 +42,11 @@ public class HostelBallotApplicationSearchBean implements Serializable {
     private HostelBallotApplication hostelBallotApplication;
     
     String applicationDate;
-    private String hostelBallotApplicationStatus;    
-    private String hostelPaymentStatus;
-    private String hostelBallotStatus;
-    private boolean hasPaid;
-                
+
     private List<HostelBallotApplication> hostelBallotApplications;
     
     public HostelBallotApplicationSearchBean() {
-        this.entityManager = HostelEntityManagerListener.createEntityManager();   
+
     }
     
     public void search() {
@@ -75,7 +76,7 @@ public class HostelBallotApplicationSearchBean implements Serializable {
             queryString = "select t from HostelBallotApplication t where ((lower(t.firstName) like '%" + searchString + "%'"
                     + " or lower(t.lastName) like '%" + searchString + "%' or lower(t.studentNumber) like '" + searchString + "') "
                     + "and t.ballotStatus = ?1) and t.applicationDate between ?2 and ?3 order by t.applicationDate";
-            query = entityManager.createQuery(queryString);            
+            query = hostelEntityManager.getEntityManager().createQuery(queryString);
             query.setParameter(1, ballotStatus);
             query.setParameter(2, searchStartDate==null?new Date():searchStartDate);
             query.setParameter(3, searchEndDate==null?new Date():searchEndDate);
@@ -84,20 +85,20 @@ public class HostelBallotApplicationSearchBean implements Serializable {
             queryString = "select t from HostelBallotApplication t where (lower(t.firstName) like '%" + searchString + "%'"
                     + " or lower(t.lastName) like '%" + searchString + "%' or lower(t.studentNumber) like '" + searchString + "') "
                     + " and t.applicationDate between ?1 and ?2 order by t.applicationDate";
-            query = entityManager.createQuery(queryString);
+            query = hostelEntityManager.getEntityManager().createQuery(queryString);
             query.setParameter(1, searchStartDate==null?new Date():searchStartDate);
             query.setParameter(2, searchEndDate==null?new Date():searchEndDate);
         
         } 
         hostelBallotApplications = query.getResultList();
-        //hostelBallotApplications = query.setMaxResults(pageSize).setFirstResult(page * pageSize).getResultList();
+
     }
     
         
     public String getHostelBallotApplication(HostelBallotApplication hostelApp) {
         log.info("inside getHostelBallotApplication: " + hostelApp.getStudentNumber());
         try {
-            hostelBallotApplication = entityManager.find(HostelBallotApplication.class, hostelApp.getId());
+            hostelBallotApplication = hostelEntityManager.getEntityManager().find(HostelBallotApplication.class, hostelApp.getId());
             
         } catch(Exception e) {
             log.error("Exception in getHostelBallotApplication: " + e.getMessage());
@@ -237,12 +238,12 @@ public class HostelBallotApplicationSearchBean implements Serializable {
     public void setHostelBallotApplications(List<HostelBallotApplication> hostelBallotApplications) {
         this.hostelBallotApplications = hostelBallotApplications;
     }
-       
-    @PreDestroy
-    public void destroyBean() {
-        if(entityManager.isOpen())
-            entityManager.close();
-        entityManager = null;        
+
+    public HostelEntityManager getHostelEntityManager() {
+        return hostelEntityManager;
     }
-    
+
+    public void setHostelEntityManager(HostelEntityManager hostelEntityManager) {
+        this.hostelEntityManager = hostelEntityManager;
+    }
 }

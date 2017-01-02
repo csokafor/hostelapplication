@@ -6,31 +6,42 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.faces.bean.ManagedProperty;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import com.perblo.hostel.entity.HostelApplication;
 import com.perblo.hostel.entity.UnpaidHostelAllocation;
-import com.perblo.hostel.helper.HostelApplicationStatus;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
+import com.perblo.hostel.entitymanager.HostelEntityManager;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
+import com.perblo.hostel.service.HostelApplicationStatus;
+
 import java.io.ByteArrayInputStream;
 import javax.annotation.PreDestroy;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+
+import com.perblo.hostel.service.HostelSettingsService;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.log4j.Logger;
 import org.primefaces.model.DefaultStreamedContent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.annotation.Secured;
 
 @ManagedBean(name="hostelAppSearchBean")
 @SessionScoped
 @Secured("Hostel Application Admin")
 public class HostelApplicationSearchBean implements Serializable {
-    private static final Logger log = Logger.getLogger(HostelApplicationSearchBean.class);
-    private EntityManager entityManager;  
-	        
+    private static final Logger log = LoggerFactory.getLogger(HostelApplicationSearchBean.class);
+
+    @ManagedProperty(value = "#{hostelEntityManager}")
+    HostelEntityManager hostelEntityManager;
+
+    @ManagedProperty(value="#{hostelSettingsService}")
+    private HostelSettingsService hostelSettingsService;
+
     private int pageSize = 20;    
     private int page;        
     private String searchString;    
@@ -41,8 +52,10 @@ public class HostelApplicationSearchBean implements Serializable {
            
     private Date searchStartDate;       
     private Date searchEndDate;   
-    
+
+    private String schoolName;
     private HostelApplication hostelApplication;
+    private String barCodeApplicationNumber = "";
     private String base64ApplicationNumber;
     private String applicationDate;
     private String hostelApplicationStatus;    
@@ -53,7 +66,7 @@ public class HostelApplicationSearchBean implements Serializable {
     private List<HostelApplication> hostelApplications;
     
     public HostelApplicationSearchBean() {
-        this.entityManager = HostelEntityManagerListener.createEntityManager();        
+
     }
         
     public void search() {
@@ -83,7 +96,7 @@ public class HostelApplicationSearchBean implements Serializable {
             queryString = "select t from HostelApplication t where ((lower(t.firstName) like '%" + searchString.toLowerCase()
                     + "%' or lower(t.lastName) like '%" + searchString.toLowerCase() + "%' or lower(t.studentNumber) like '%" + searchString.toLowerCase() + "%') "
                     + "and t.paymentStatus = ?1 and t.ballotStatus = ?2) and t.applicationDate between ?3 and ?4 order by t.applicationDate";
-            query = entityManager.createQuery(queryString);
+            query = hostelEntityManager.getEntityManager().createQuery(queryString);
             query.setParameter(1, paymentStatus);
             query.setParameter(2, ballotStatus);
             query.setParameter(3, searchStartDate==null?new Date():searchStartDate);
@@ -96,14 +109,14 @@ public class HostelApplicationSearchBean implements Serializable {
             queryString = "select t from HostelApplication t where (lower(t.firstName) like '%" + searchString.toLowerCase()
                     + "%' or lower(t.lastName) like '%" + searchString.toLowerCase() + "%' or lower(t.studentNumber) like '%" + searchString.toLowerCase() + "%') "
                     + " and t.applicationDate between ?1 and ?2 order by t.applicationDate";
-            query = entityManager.createQuery(queryString);
+            query = hostelEntityManager.getEntityManager().createQuery(queryString);
             query.setParameter(1, searchStartDate==null?new Date():searchStartDate);
             query.setParameter(2, searchEndDate==null?new Date():searchEndDate);
         } else if (paymentStatus == -1) {
             queryString = "select t from HostelApplication t where ((lower(t.firstName) like '%" + searchString.toLowerCase()
                     + "%' or lower(t.lastName) like '%" + searchString.toLowerCase() + "%' or lower(t.studentNumber) like '%" + searchString.toLowerCase() + "%') "
                     + " and t.ballotStatus = ?1) and t.applicationDate between ?2 and ?3 order by t.applicationDate";
-            query = entityManager.createQuery(queryString);
+            query = hostelEntityManager.getEntityManager().createQuery(queryString);
             query.setParameter(1, ballotStatus);
             query.setParameter(2, searchStartDate==null?new Date():searchStartDate);
             query.setParameter(3, searchEndDate==null?new Date():searchEndDate);
@@ -111,7 +124,7 @@ public class HostelApplicationSearchBean implements Serializable {
             queryString = "select t from HostelApplication t where ((lower(t.firstName) like '%" + searchString.toLowerCase()
                     + "%' or lower(t.lastName) like '%" + searchString.toLowerCase() + "%' or lower(t.studentNumber) like '%" + searchString.toLowerCase() + "%') "
                     + " and t.paymentStatus = ?1) and t.applicationDate between ?2 and ?3 order by t.applicationDate";
-            query = entityManager.createQuery(queryString);
+            query = hostelEntityManager.getEntityManager().createQuery(queryString);
             query.setParameter(1, paymentStatus);
             query.setParameter(2, searchStartDate==null?new Date():searchStartDate);
             query.setParameter(3, searchEndDate==null?new Date():searchEndDate);
@@ -127,7 +140,7 @@ public class HostelApplicationSearchBean implements Serializable {
             calendar.add(Calendar.DAY_OF_YEAR, -7);
             int counter = 0;
             
-            Query query = entityManager.createNamedQuery("getUnpaidHostelApplicationByDate");
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getUnpaidHostelApplicationByDate");
             query.setParameter(1, calendar.getTime());
             List<HostelApplication> unpaidApplications = (List<HostelApplication>)query.getResultList();
             
@@ -141,13 +154,13 @@ public class HostelApplicationSearchBean implements Serializable {
                     unpaidHostelAllocation.setHostelRoom(hostelApp.getHostelAllocation().getHostelRoom());
                     unpaidHostelAllocation.setHostelRoomBedSpace(hostelApp.getHostelAllocation().getHostelRoomBedSpace());
                     unpaidHostelAllocation.setStudentNumber(hostelApp.getHostelAllocation().getStudentNumber());
-                    entityManager.persist(unpaidHostelAllocation);
+                    hostelEntityManager.persist(unpaidHostelAllocation);
 
                     hostelApp.setHostelAllocation(null);
                     hostelApp.setBallotStatus(HostelApplicationStatus.PENDING);
-                    entityManager.merge(hostelApp);
+                    hostelEntityManager.merge(hostelApp);
                     
-                    entityManager.remove(hostelAllocation);
+                    hostelEntityManager.delete(HostelAllocation.class, hostelAllocation.getId());
                     log.info("removed allocation for " + hostelApp.getStudentNumber() + ", applicationdate = " + formatDate(hostelApp.getApplicationDate()));
                     counter++;
                 }
@@ -164,8 +177,10 @@ public class HostelApplicationSearchBean implements Serializable {
     public String getHostelApplication(HostelApplication hostelApp) {
         log.info("inside getHostelApplication: " + hostelApp.getStudentNumber());
         try {
-            hostelApplication = entityManager.find(HostelApplication.class, hostelApp.getId());
+            hostelApplication = hostelEntityManager.getEntityManager().find(HostelApplication.class, hostelApp.getId());
             setBase64ApplicationNumber(Base64.encodeBase64String(hostelApplication.getApplicationNumber().getBytes()));
+            barCodeApplicationNumber = hostelApplication.getApplicationNumber().substring(1);
+
         } catch(Exception e) {
             log.error("Exception in getHostelApplication: " + e.getMessage());
         }
@@ -202,11 +217,6 @@ public class HostelApplicationSearchBean implements Serializable {
     public void setPassport(DefaultStreamedContent passport) {
         this.passport = passport;
     }
-    
-    public void printHallRegulation() {
-        log.info("printHallRegulation");
-    }
-    
 
     public boolean isNextPageAvailable() {
         return hostelApplications != null && hostelApplications.size() == pageSize;
@@ -360,13 +370,37 @@ public class HostelApplicationSearchBean implements Serializable {
     public void setBase64ApplicationNumber(String base64ApplicationNumber) {
         this.base64ApplicationNumber = base64ApplicationNumber;
     }
-    
-               
-    @PreDestroy
-    public void destroyBean() {
-        if(entityManager.isOpen())
-            entityManager.close();
-        entityManager = null;        
+
+    public HostelSettingsService getHostelSettingsService() {
+        return hostelSettingsService;
     }
 
+    public void setHostelSettingsService(HostelSettingsService hostelSettingsService) {
+        this.hostelSettingsService = hostelSettingsService;
+    }
+
+    public HostelEntityManager getHostelEntityManager() {
+        return hostelEntityManager;
+    }
+
+    public void setHostelEntityManager(HostelEntityManager hostelEntityManager) {
+        this.hostelEntityManager = hostelEntityManager;
+    }
+
+    public String getSchoolName() {
+        schoolName = hostelSettingsService.getSchoolName();
+        return schoolName;
+    }
+
+    public void setSchoolName(String schoolName) {
+        this.schoolName = schoolName;
+    }
+
+    public String getBarCodeApplicationNumber() {
+        return barCodeApplicationNumber;
+    }
+
+    public void setBarCodeApplicationNumber(String barCodeApplicationNumber) {
+        this.barCodeApplicationNumber = barCodeApplicationNumber;
+    }
 }

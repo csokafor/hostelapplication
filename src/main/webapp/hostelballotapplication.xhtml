@@ -7,61 +7,62 @@
 	
 	<ui:define name="content">
         
-        <p:panel header="Ballot Application" rendered="#{ballotBean.hasBallotEnded}">        	
+        <p:panel header="Hostel Ballot" rendered="#{ballotBean.hasBallotEnded}">
             
             <br/>
                 <p style="color: red"><strong>Hostel Balloting ended on #{ballotBean.hostelBallotEndDate}</strong></p>
             <br/>
         </p:panel>
             
-        <p:panel header="Ballot Application" rendered="#{!ballotBean.hasBallotEnded}">   
+        <p:panel header="Hostel Ballot" rendered="#{!ballotBean.hasBallotEnded}">
         	
-        	<h:form id="hostelApplicationForm">     	
-                    <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
-	            <p:panelGrid columns="2" columnClasses="label, value">
-                    <h:outputText value="Academic Session" />
-                    <h:inputText id="academicSession" readonly="true" value="#{hostelSettingsHelper.currentAcademicSession.sessionName}"/>
+        	<h:form id="hostelApplicationForm">
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+                <p:messages id="messages" showDetail="true" autoUpdate="true" closable="true"/>
+	            <p:panelGrid columns="2">
+                    <h:outputLabel for="academicSession" value="Academic Session" />
+                    <h:inputText id="academicSession" readonly="true" value="#{hostelSettingsService.currentAcademicSession.sessionName}"/>
                     
-                    <h:outputText value="Ballot Number" rendered="#{ballotBean.hostelApplicatonSaved}"/>
+                    <h:outputLabel for="ballotNumber" value="Ballot Number" rendered="#{ballotBean.hostelApplicatonSaved}"/>
                     <h:outputText id="ballotNumber" value="#{ballotBean.ballotApplication.applicationNumber}" 
                                   rendered="#{ballotBean.hostelApplicatonSaved}"/>
                     
-                    <h:outputText value="Ballot" rendered="#{ballotBean.hostelApplicatonSaved}"/>
+                    <h:outputLabel for="ballotField" value="Ballot" rendered="#{ballotBean.hostelApplicatonSaved}"/>
                     <h:outputText id="ballotField" value="#{ballotBean.ballotStatus}" rendered="#{ballotBean.hostelApplicatonSaved}"/>
                                                                  
-                    <h:outputText value="Student Number" />
+                    <h:outputLabel for="studentNumber" value="Student Number" />
                     <h:inputText id="studentNumber" required="true" value="#{ballotBean.ballotApplication.studentNumber}"/>
                                                    
-                    <h:outputText value="First Name" />
+                    <h:outputLabel for="firstName" value="First Name" />
                     <h:inputText id="firstName" required="true" value="#{ballotBean.ballotApplication.firstName}"/>
                                 
-                    <h:outputText value="Last Name" />
+                    <h:outputLabel for="lastName" value="Last Name" />
                     <h:inputText id="lastName" required="true" value="#{ballotBean.ballotApplication.lastName}"/>
                                 
-                    <h:outputText value="Other Names" />
+                    <h:outputLabel for="otherNames" value="Other Names" />
                     <h:inputText id="otherNames" required="false" value="#{ballotBean.ballotApplication.otherNames}"/>
                                                                   
-                    <h:outputText value="Gender" />
+                    <h:outputLabel for="gender" value="Gender" />
                     <h:selectOneMenu id="gender" value="#{ballotBean.ballotApplication.gender}">
                         <f:selectItem id="male" itemLabel="MALE" itemValue="MALE"/>
                         <f:selectItem id="female" itemLabel="FEMALE" itemValue="FEMALE"/>                           
                     </h:selectOneMenu>
                                                        
-                    <h:outputText value="Phone Number" />
+                    <h:outputLabel for="phoneNumber" value="Phone Number" />
                     <h:inputText id="phoneNumber" required="true" value="#{ballotBean.ballotApplication.phoneNumber}"/>
                                                 
-                    <h:outputText value="Email" />
+                    <h:outputLabel for="email" value="Email" />
                     <h:inputText id="email" required="true" value="#{ballotBean.ballotApplication.email}"/>
                                                                              
-                    <h:outputText value="Faculty" />
+                    <h:outputLabel for="faculty" value="Faculty" />
                     <h:selectOneMenu id="faculty" required="true" value="#{ballotBean.facultyId}">
                         <f:ajax event="change" listener="#{ballotBean.updateDepartmentList}" render="department" />
                         <f:selectItem itemLabel="Select Faculty" itemValue="0" />
-                        <f:selectItems value="#{hostelApplicationHelper.faculties}" var="facultyItem"
+                        <f:selectItems value="#{ballotBean.faculties}" var="facultyItem"
                             itemLabel="#{facultyItem.name}" itemValue="#{facultyItem.id}"  />                        
                     </h:selectOneMenu>
 	                
-                    <h:outputText value="Department" />
+                    <h:outputLabel for="department" value="Department" />
                     <h:selectOneMenu id="department" required="true" value="#{ballotBean.departmentId}">
                         <f:ajax event="change" listener="#{ballotBean.updateProgrammeOfStudyList}" render="programmeOfStudy"/>
                         <f:selectItem itemLabel="Select Department" itemValue="0" />
@@ -69,7 +70,7 @@
                                        itemValue="#{departmentItem.id}"/>                             
                     </h:selectOneMenu>      
 	                           
-                    <h:outputText value="Course of Study" />                    
+                    <h:outputLabel for="programmeOfStudy" value="Course of Study" />
                     <h:selectOneMenu id="programmeOfStudy" required="true" value="#{ballotBean.cosId}">
                         <f:selectItem itemLabel="Select Course of Study" itemValue="0" />
                         <f:selectItems value="#{ballotBean.programmeOfStudyList}" var="programmeOfStudyItem" itemLabel="#{programmeOfStudyItem.name}" 

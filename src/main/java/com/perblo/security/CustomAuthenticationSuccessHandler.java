@@ -11,7 +11,9 @@ import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.WebAttributes;
@@ -22,7 +24,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-    protected Logger logger = Logger.getLogger(CustomAuthenticationSuccessHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomAuthenticationSuccessHandler.class);
     private CustomRedirectStrategy redirectStrategy = new CustomRedirectStrategy();
     
     @Override
@@ -37,7 +39,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         String targetUrl = determineTargetUrl(authentication);
 
         if (response.isCommitted()) {
-            logger.debug("Response has already been committed. Unable to redirect to " + targetUrl);
+            log.debug("Response has already been committed. Unable to redirect to " + targetUrl);
             return;
         }
         redirectStrategy.setContextRelative(false);
@@ -57,7 +59,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         for (GrantedAuthority grantedAuthority : authorities) {
             if (grantedAuthority.getAuthority().contains("ADMIN")) {
-                logger.info("grantedAuthority " + grantedAuthority.getAuthority());
+                log.info("grantedAuthority " + grantedAuthority.getAuthority());
                 isAdmin = true;
                 break;
             } 

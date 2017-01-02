@@ -5,17 +5,15 @@
 package com.perblo.payment;
 
 
+import com.perblo.hostel.entity.EligibleBallotStudent;
 import com.perblo.hostel.entity.HostelApplication;
-import com.perblo.hostel.listener.HostelEntityManagerListener;
+import com.perblo.hostel.entitymanager.HostelEntityManager;
+import com.perblo.hostel.entitymanager.HostelEntityManagerImpl;
 import com.perblo.payment.entity.PaymentTransaction;
 import com.perblo.payment.entity.Pin;
-import static com.perblo.security.LoginManager.LOGIN_USER;
-import com.perblo.security.LoginUser;
 import com.perblo.security.LoginUserBean;
-import java.io.File;
-import java.io.FileInputStream;
+
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,12 +24,15 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
+import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ActionEvent;
+import javax.faces.validator.ValidatorException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 import javax.persistence.Query;
+import javax.servlet.http.Part;
+
 import org.apache.log4j.Logger;
 import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.hssf.usermodel.*;
@@ -45,15 +46,17 @@ import org.springframework.security.access.annotation.Secured;
  *
  * @author chinedu
  */
-//@Restrict("#{s:hasRole('Pin Admin') or s:hasRole('Hostel Admin')}")
 @ManagedBean(name="pinAdminBean")
 @SessionScoped
 public class PinAdminBean implements Serializable {
     private static final Logger log = Logger.getLogger(PinAdminBean.class);
-    private EntityManager entityManager;
-               
-    @ManagedProperty(value="#{paymentHelper}")
-    private PaymentHelper paymentHelper;
+    private static HSSFDataFormatter formatter =  new HSSFDataFormatter();
+
+    @ManagedProperty(value = "#{hostelEntityManager}")
+    HostelEntityManager hostelEntityManager;
+
+    @ManagedProperty(value="#{paymentService}")
+    private PaymentService paymentService;
     
     @ManagedProperty(value="#{loginUserBean}")
     LoginUserBean loginUserBean;
@@ -67,18 +70,17 @@ public class PinAdminBean implements Serializable {
     private String fileExtension;    
     private String fileName;    
     private String contentType;
-    
-    private UploadedFile uploadedFile;
-    
+
+    private Part uploadedPinFile;
         
     public PinAdminBean() {
-        this.entityManager = HostelEntityManagerListener.createEntityManager();
+
     }
                     
     @Secured("Hostel Admin")
     public void checkPinStatus() {
         try {
-            Query query = entityManager.createNamedQuery("getPinBySerialNumber");
+            Query query = hostelEntityManager.getEntityManager().createNamedQuery("getPinBySerialNumber");
             query.setParameter(1, serialNumber);
             pin = (Pin)query.getSingleResult();
             
@@ -91,126 +93,104 @@ public class PinAdminBean implements Serializable {
             log.error("Exception in checkPinStatus: " + e.getMessage());
         }
     }
-    
-    //@Restrict("#{s:hasRole('Pin Admin')}")
+
     @Secured("Pin Admin")
     public void uploadFile() {
         log.info("uploadFile");
-    	pinList = new ArrayList<Pin>();
-        log.info("file content size: " + uploadedFile.getContents().length);
-        log.info("content type: " + uploadedFile.getContentType());
-        log.info("file name: " + uploadedFile.getFileName());
-                
-        //log.info("filename = " + fileName + " contentType = " + contentType + " data size = " + data.length);
-        
-    	if(uploadedFile.getFileName().contains("xlsx") || uploadedFile.getFileName().contains("xls")) {
-            getPinData();
+        pinList = new ArrayList<Pin>();
+
+        String fileName = getFilename(uploadedPinFile);
+        log.info("filename: " + fileName + " , contentType: " + uploadedPinFile.getContentType() + " , size: " + uploadedPinFile.getSize());
+
+        if(fileName.contains("xlsx") || fileName.contains("xls")) {
+            getPinData(fileName);
             FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_INFO, pinList.size() + " pin numbers uploaded",""));
-            
+                    new FacesMessage(FacesMessage.SEVERITY_INFO, pinList.size() + " pin numbers uploaded",""));
         } else {
             FacesContext.getCurrentInstance().addMessage(null,
-                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Please upload an excel file.",""));            
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Please upload an excel file.",""));
         }
-    	
+
     }
-    
-    private void getPinData() {
+
+    private void getPinData(String fileName) {
                 
         String batchNumber;
         String serialNumber;        
         String pinNumber;
         float pinValue;
-                
         
         log.info("getPinData()");
         int numberOfRecords = 0;
 
-        try {            
-                            
-                EntityTransaction transaction = entityManager.getTransaction();
-                transaction.begin();
-                
+        try {
                 //check for xlsx files
-                if (uploadedFile.getFileName().contains("xlsx")) {
-                    //XSSFWorkbook workBook = new XSSFWorkbook(fistream);
-                    XSSFWorkbook workBook = new XSSFWorkbook(uploadedFile.getInputstream());
+                if (fileName.contains("xlsx")) {
+                    XSSFWorkbook workBook = new XSSFWorkbook(uploadedPinFile.getInputStream());
                     XSSFSheet workSheet = workBook.getSheetAt(0);
-                    Iterator<Row> rowsIter = workSheet.rowIterator();
-                    while (rowsIter.hasNext()) {
-                        Row currentRow = rowsIter.next();
-                        if(currentRow.getRowNum() == 0) {
-                            continue;
-                        }
-                        Iterator<Cell> cellsIter = currentRow.cellIterator();
-                        //excel sheet format batchnumber, serial number, pin number, pin value
-                        while (cellsIter.hasNext()) {
-                            Cell batchNumberCell = cellsIter.next();
-                            batchNumberCell.setCellType(Cell.CELL_TYPE_STRING);
-                            batchNumber = batchNumberCell.getStringCellValue();
-                            
-                            Cell serialNumberCell = cellsIter.next();
-                            serialNumberCell.setCellType(Cell.CELL_TYPE_STRING);
-                            serialNumber = serialNumberCell.getStringCellValue();
-                            
-                            Cell pinNumberCell = cellsIter.next();
-                            pinNumberCell.setCellType(Cell.CELL_TYPE_STRING);
-                            pinNumber = pinNumberCell.getStringCellValue();
-                            
-                            Cell pinValueCell = cellsIter.next();
-                            pinValueCell.setCellType(Cell.CELL_TYPE_NUMERIC);
-                            pinValue = new Double(pinValueCell.getNumericCellValue()).floatValue();                            
-                                                       
-                            numberOfRecords++;
-                            
-                            log.info("batchNumber = " + batchNumber + ", serialNumber = " + serialNumber + " pinValue = " + pinValue);
-                            
-                            Pin newpin = this.addPin(batchNumber, serialNumber, pinNumber, pinValue);
+
+                    int noOfRows = workSheet.getPhysicalNumberOfRows();
+                    log.info("no of rows " + workSheet.getPhysicalNumberOfRows());
+
+                    for(int i = 1; i < noOfRows; i++) {
+                        Row row = workSheet.getRow(i);
+                        int noOfCells = row.getPhysicalNumberOfCells();
+                        log.info("upload row " + i + " no of cells " + noOfCells);
+
+                        Cell batchNumberCell = row.getCell(0, Row.RETURN_BLANK_AS_NULL);
+                        batchNumber = formatter.formatCellValue(batchNumberCell).trim().toUpperCase();
+
+                        Cell serialNumberCell = row.getCell(1, Row.RETURN_BLANK_AS_NULL);
+                        serialNumber = formatter.formatCellValue(serialNumberCell).trim().toUpperCase();
+
+                        Cell pinNumberCell = row.getCell(2, Row.RETURN_BLANK_AS_NULL);
+                        pinNumber = formatter.formatCellValue(pinNumberCell).trim().toUpperCase();
+
+                        Cell pinValueCell = row.getCell(3, Row.RETURN_BLANK_AS_NULL);
+                        pinValue = new Double(pinValueCell.getNumericCellValue()).floatValue();
+
+                        numberOfRecords++;
+                        log.info("batchNumber = " + batchNumber + ", serialNumber = " + serialNumber + " pinValue = " + pinValue);
+
+                        Pin oldpin = paymentService.getPinByPinNumber(pinNumber);
+                        if(oldpin == null) {
+                            Pin newpin = paymentService.addPin(batchNumber, serialNumber, pinNumber, pinValue, loginUserBean.getUser().getUserName());
                             pinList.add(newpin);
-                            
+                        } else {
+                            log.warn(serialNumber + " pin already exists");
                         }
-                        
                     }
 
                 } else {
-                    HSSFWorkbook hssfWorkBook = new HSSFWorkbook(uploadedFile.getInputstream());
+                    HSSFWorkbook hssfWorkBook = new HSSFWorkbook(uploadedPinFile.getInputStream());
                     HSSFSheet hssfWorkSheet = hssfWorkBook.getSheetAt(0);
-                    Iterator<Row> rowsIter = hssfWorkSheet.rowIterator();
-                    while (rowsIter.hasNext()) {
-                        Row currentRow = rowsIter.next();
-                        if(currentRow.getRowNum() == 0) {
-                            continue;
-                        }
-                        
-                        Iterator<Cell> cellsIter = currentRow.cellIterator();
-                        while (cellsIter.hasNext()) {
-                            Cell batchNumberCell = cellsIter.next();
-                            batchNumberCell.setCellType(Cell.CELL_TYPE_STRING);
-                            batchNumber = batchNumberCell.getStringCellValue();
-                            
-                            Cell serialNumberCell = cellsIter.next();
-                            serialNumberCell.setCellType(Cell.CELL_TYPE_STRING);
-                            serialNumber = serialNumberCell.getStringCellValue();
-                            
-                            Cell pinNumberCell = cellsIter.next();
-                            pinNumberCell.setCellType(Cell.CELL_TYPE_STRING);
-                            pinNumber = pinNumberCell.getStringCellValue();
-                            
-                            Cell pinValueCell = cellsIter.next();
-                            pinValueCell.setCellType(Cell.CELL_TYPE_NUMERIC);
-                            pinValue = new Double(pinValueCell.getNumericCellValue()).floatValue();  
-                                                                                    
-                            numberOfRecords++;
-                            
-                            log.info("batchNumber = " + batchNumber + ", serialNumber = " + serialNumber + " pinValue = " + pinValue);
-                            
-                            Pin newpin = this.addPin(batchNumber, serialNumber, pinNumber, pinValue);
-                            pinList.add(newpin);
-                        }
+                    int noOfRows = hssfWorkSheet.getPhysicalNumberOfRows();
+                    log.info("no of rows " + hssfWorkSheet.getPhysicalNumberOfRows());
+
+                    for(int i = 1; i < noOfRows; i++) {
+                        Row row = hssfWorkSheet.getRow(i);
+                        int noOfCells = row.getPhysicalNumberOfCells();
+                        log.info("upload row " + i + " no of cells " + noOfCells);
+
+                        Cell batchNumberCell = row.getCell(0, Row.RETURN_BLANK_AS_NULL);
+                        batchNumber = batchNumberCell.getStringCellValue().trim().toUpperCase();
+
+                        Cell serialNumberCell = row.getCell(1, Row.RETURN_BLANK_AS_NULL);
+                        serialNumber = serialNumberCell.getStringCellValue().trim().toUpperCase();
+
+                        Cell pinNumberCell = row.getCell(2, Row.RETURN_BLANK_AS_NULL);
+                        pinNumber = pinNumberCell.getStringCellValue().trim().toUpperCase();
+
+                        Cell pinValueCell = row.getCell(3, Row.RETURN_BLANK_AS_NULL);
+                        pinValue = new Double(pinValueCell.getNumericCellValue()).floatValue();
+
+                        numberOfRecords++;
+                        log.info("batchNumber = " + batchNumber + ", serialNumber = " + serialNumber + " pinValue = " + pinValue);
+
+                        Pin newpin = paymentService.addPin(batchNumber, serialNumber, pinNumber, pinValue, loginUserBean.getUser().getUserName());
+                        pinList.add(newpin);
                     }
                 }
-                              
-                transaction.commit();
 
         } catch (FileNotFoundException e) {
             log.error(e.getMessage(), e);
@@ -222,62 +202,36 @@ public class PinAdminBean implements Serializable {
             FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, "An error occured while processing your request.","")); 
             
-        } finally {
-                  
         }
-        
     }
-    
-    private Pin addPin(String batchNumber, String serialNumber, String pinNumber, float pinValue) {
-        Pin pin = new Pin();
-        try {
-            pin.setBatchNumber(batchNumber);
-            pin.setSerialNumber(serialNumber);
-            pin.setPinNumber(pinNumber);
-            pin.setPinValue(pinValue);
-            pin.setEnabled(true);
-            pin.setUsedStatus(false);
-            pin.setGenerationDate(Calendar.getInstance().getTime());
-            pin.setDateUploaded(Calendar.getInstance().getTime());
-            pin.setUploadedBy(loginUserBean.getCurrentUser().getUserName());
-            
-            //check if pin exists
-            Pin existingPin = paymentHelper.getPinByPinNumber(pinNumber);
-            if(existingPin == null) {                
-                entityManager.persist(pin);
+
+    public void validateExcelFile(FacesContext ctx, UIComponent comp, Object value) {
+        List<FacesMessage> msgs = new ArrayList<FacesMessage>();
+        Part file = (Part) value;
+        String contentType = file.getContentType();
+        log.info("contentType: " + contentType);
+
+        String fileName = getFilename(file);
+        if (!(fileName.contains("xls") || fileName.contains("xlsx"))) {
+
+            msgs.add(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Invalid File",
+                    fileName + " is not a valid excel file"));
+        }
+        if (!msgs.isEmpty()) {
+            throw new ValidatorException(msgs);
+        }
+    }
+
+    private String getFilename(Part part) {
+        for (String cd : part.getHeader("content-disposition").split(";")) {
+            if (cd.trim().startsWith("filename")) {
+                String filename = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
+                return filename.substring(filename.lastIndexOf('/') + 1).substring(filename.lastIndexOf('\\') + 1);
+
             }
-            
-        } catch(Exception e) {
-            log.error("Error addPin: " + e.getMessage());
         }
-        
-        return pin;
+        return null;
     }
-    
-    public String getPinUser(String pinNumber) {
-        String pinUser = null;
-        try {
-            Query query = entityManager.createNamedQuery("getPaymentTransactionByTransactionId");
-            query.setParameter(1, pinNumber);
-            PaymentTransaction paymentTx = (PaymentTransaction) query.getSingleResult();
-            if(paymentTx == null) {
-                pinUser = "Not found";
-            } else {
-                query = entityManager.createNamedQuery("getHostelApplicationByPaymentTransactionId");
-                query.setParameter(1, paymentTx.getId());
-                HostelApplication hostelApp = (HostelApplication) query.getSingleResult();
-                if(hostelApp != null) {
-                    pinUser = hostelApp.getStudentNumber();
-                }                
-            }
-            
-        } catch(Exception e) {
-            log.error("getPinUser exception: " + e.getMessage());
-        }
-        
-        return pinUser;
-    }
-          
 
     public String getContentType() {
         return contentType;
@@ -334,28 +288,28 @@ public class PinAdminBean implements Serializable {
     public void setLoginUserBean(LoginUserBean loginUserBean) {
         this.loginUserBean = loginUserBean;
     }
-    
-    public UploadedFile getUploadedFile() {
-        return uploadedFile;
+
+    public Part getUploadedPinFile() {
+        return uploadedPinFile;
     }
 
-    public void setUploadedFile(UploadedFile uploadedFile) {
-        this.uploadedFile = uploadedFile;
+    public void setUploadedPinFile(Part uploadedPinFile) {
+        this.uploadedPinFile = uploadedPinFile;
     }
 
-    public PaymentHelper getPaymentHelper() {
-        return paymentHelper;
+    public PaymentService getPaymentService() {
+        return paymentService;
     }
 
-    public void setPaymentHelper(PaymentHelper paymentHelper) {
-        this.paymentHelper = paymentHelper;
+    public void setPaymentService(PaymentService paymentService) {
+        this.paymentService = paymentService;
     }
-        
-    @PreDestroy
-    public void destroyBean() {
-        if(entityManager.isOpen())
-            entityManager.close();
-        entityManager = null;        
+
+    public HostelEntityManager getHostelEntityManager() {
+        return hostelEntityManager;
     }
-    
+
+    public void setHostelEntityManager(HostelEntityManager hostelEntityManager) {
+        this.hostelEntityManager = hostelEntityManager;
+    }
 }
