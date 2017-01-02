@@ -28,6 +28,7 @@ import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.Part;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.UploadedFile;
@@ -75,6 +76,7 @@ public class HostelApplicationStatusBean implements Serializable {
     private Random random = new Random();
     private boolean hasApplicationEnded;   
     private String hostelApplicationEndDate;
+    private String base64ApplicationNumber = "";
     private String barCodeApplicationNumber = "15000";
 
     private String passportFileExtension;
@@ -249,6 +251,8 @@ public class HostelApplicationStatusBean implements Serializable {
             log.info("filename: " + fileName + " , contentType: " + uploadedFile.getContentType() + " , size: " + uploadedFile.getSize());
 
             if (fileName.contains("jpg") || fileName.contains("jpeg") || fileName.contains("png")) {
+                hostelApplication.setPassportData(IOUtils.toByteArray(uploadedFile.getInputStream()));
+                hostelApplication.setPassportContentType(uploadedFile.getContentType());
                 hostelApplicationService.setHostelApplicationPassport(hostelApplication, uploadedFile);
 
                 FacesContext.getCurrentInstance().addMessage(null,
@@ -293,6 +297,9 @@ public class HostelApplicationStatusBean implements Serializable {
 
     public String printApplicationStatus() {
         log.info("printApplicationStatus");
+        setBase64ApplicationNumber(Base64.encodeBase64String(hostelApplication.getApplicationNumber().getBytes()));
+        barCodeApplicationNumber = hostelApplication.getApplicationNumber().substring(1);
+
         return "printapplicationstatus";
     }
     
@@ -525,5 +532,11 @@ public class HostelApplicationStatusBean implements Serializable {
         this.hostelEntityManager = hostelEntityManager;
     }
 
-    
+    public String getBase64ApplicationNumber() {
+        return base64ApplicationNumber;
+    }
+
+    public void setBase64ApplicationNumber(String base64ApplicationNumber) {
+        this.base64ApplicationNumber = base64ApplicationNumber;
+    }
 }

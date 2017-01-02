@@ -10,10 +10,11 @@
 
 	<h:head>		
 		<h:outputStylesheet name="print-orange.css" library="css" />
-		<h:outputStylesheet name="print-style.css" library="css" />        		          
+		<h:outputStylesheet name="print-style.css" library="css" />
+        <link rel="icon" href="#{resource['img/favicon.ico']}" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-                <title>#{hostelSettingsService.getSchoolName()} Hostel Management System </title>
+        <title>#{hostelSettingsService.getSchoolName()} Hostel Management System </title>
 	</h:head>
     
     <h:body onload="window.print()">
@@ -94,14 +95,12 @@
             <br/>
         
         <div>
-            <!--
-            <p:barcode value="#{applicationStatusBean.hostelApplication.applicationNumber}" type="ean13" /> 
-            -->
             <p:barcode value="#{applicationStatusBean.barCodeApplicationNumber}" type="postnet" />
+            <p:barcode value="#{applicationStatusBean.barCodeApplicationNumber}" type="pdf417" />
         </div>
 	<br/>
         <div id="footer">
-	    &copy; 2015 #{hostelSettingsService.getSchoolName()} Powered by Anamme - #{applicationStatusBean.barCodeApplicationNumber}
+	    &copy; 2017 #{hostelSettingsService.getSchoolName()} Powered by Anamme - #{applicationStatusBean.base64ApplicationNumber}
 	</div>
 	  
     </div>

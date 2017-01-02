@@ -8,12 +8,13 @@
         xmlns:f="http://java.sun.com/jsf/core"
       >
 
-	<h:head>		
-		<h:outputStylesheet name="print-orange.css" library="css" />
-		<h:outputStylesheet name="print-style.css" library="css" />        		          
+	<h:head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
-                <title>#{hostelAppSearchBean.getSchoolName()} Hostel Management System - #{hostelAppSearchBean.base64ApplicationNumber}</title>
+        <link rel="icon" href="#{resource['img/favicon.ico']}" />
+        <h:outputStylesheet name="print-orange.css" library="css" />
+        <h:outputStylesheet name="print-style.css" library="css" />
+        <title>#{hostelAppSearchBean.getSchoolName()} Hostel Management System - #{hostelAppSearchBean.base64ApplicationNumber}</title>
 	</h:head>
     
     <h:body onload="window.print()">
@@ -94,10 +95,8 @@
             <br/>
         
         <div>
-            <!--
-            <p:barcode value="#{hostelAppSearchBean.hostelApplication.applicationNumber}" type="ean13" /> 
-            -->
-            <p:barcode value="#{hostelAppSearchBean.hostelApplication.applicationNumber}" type="postnet" />
+            <p:barcode value="#{hostelAppSearchBean.barCodeApplicationNumber}" type="postnet" />
+            <p:barcode value="#{hostelAppSearchBean.barCodeApplicationNumber}" type="pdf417" />
         </div>
 	<br/>
         <div id="footer">

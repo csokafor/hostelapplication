@@ -55,6 +55,7 @@ public class HostelApplicationSearchBean implements Serializable {
 
     private String schoolName;
     private HostelApplication hostelApplication;
+    private String barCodeApplicationNumber = "";
     private String base64ApplicationNumber;
     private String applicationDate;
     private String hostelApplicationStatus;    
@@ -178,6 +179,8 @@ public class HostelApplicationSearchBean implements Serializable {
         try {
             hostelApplication = hostelEntityManager.getEntityManager().find(HostelApplication.class, hostelApp.getId());
             setBase64ApplicationNumber(Base64.encodeBase64String(hostelApplication.getApplicationNumber().getBytes()));
+            barCodeApplicationNumber = hostelApplication.getApplicationNumber().substring(1);
+
         } catch(Exception e) {
             log.error("Exception in getHostelApplication: " + e.getMessage());
         }
@@ -391,5 +394,13 @@ public class HostelApplicationSearchBean implements Serializable {
 
     public void setSchoolName(String schoolName) {
         this.schoolName = schoolName;
+    }
+
+    public String getBarCodeApplicationNumber() {
+        return barCodeApplicationNumber;
+    }
+
+    public void setBarCodeApplicationNumber(String barCodeApplicationNumber) {
+        this.barCodeApplicationNumber = barCodeApplicationNumber;
     }
 }

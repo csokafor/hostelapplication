@@ -32,9 +32,9 @@
 
             <h:outputLabel for="paymentStatus" value="Payment Status" />
             <h:outputText id="paymentStatus" rendered="#{hostelPaymentBean.paymentSuccessful}" value="Payment Successful" />
-            <h:outputText rendered="#{!hostelPaymentBean.paymentSuccessful}" value="Payment Not Successful" />
+            <h:outputText rendered="#{!hostelPaymentBean.paymentSuccessful}" value="No Payment" />
 
-            <h:outputText for="pinNumber" rendered="#{!hostelPaymentBean.paymentSuccessful}" value="Pin Number" />
+            <h:outputLabel for="pinNumber" rendered="#{!hostelPaymentBean.paymentSuccessful}" value="Pin Number" />
             <h:inputSecret rendered="#{!hostelPaymentBean.paymentSuccessful}" id="pinNumber" required="true" value="#{hostelPaymentBean.pinNumber}"/>
 
             </p:panelGrid>   
