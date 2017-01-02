@@ -7,7 +7,7 @@
     <artifactId>hostelapplication</artifactId>
     <packaging>war</packaging>
     <name>Hostel Webapp</name>
-    <version>1.1</version>
+    <version>1.2</version>
 	
 	<description>Hostel Applicaion Web App</description>
 	<url>https://github.com/csokafor/hostelapplication</url>
